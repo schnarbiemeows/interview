@@ -1,0 +1,11 @@
+.metadata/
+.mvn/
+.settings/
+target/
+*.classpath
+*.project
+*HELP.md
+*kubernetes_commands.txt
+*mvnw
+*mvnw.cmd
+jwttoken/
