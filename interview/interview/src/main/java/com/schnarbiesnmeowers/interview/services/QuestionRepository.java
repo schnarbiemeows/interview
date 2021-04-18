@@ -1,13 +1,14 @@
 package com.schnarbiesnmeowers.interview.services;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import com.schnarbiesnmeowers.interview.pojos.Question;
 /**
  *
  * @author Dylan I. Kessler
  *
  */
-public interface QuestionRepository extends CrudRepository<Question, Integer>{
+public interface QuestionRepository extends JpaRepository<Question, Integer>{
 
 
 	/**

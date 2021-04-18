@@ -20,8 +20,6 @@ public class QuestionLevel implements Serializable {
 	// default serial version id, required for serializable classes
 	private static final long serialVersionUID = 1L;
 
-	//private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
-
 	/**
 	 * 
 	 */

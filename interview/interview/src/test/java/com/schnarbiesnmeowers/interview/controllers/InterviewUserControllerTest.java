@@ -159,19 +159,19 @@ public class InterviewUserControllerTest {
 		String[] stringarray = new String[1];
 		stringarray[0] = Randomizer.randomString(3);
 		record.setAuthorizations(stringarray);
-		record.setEmailaddr(Randomizer.randomString(20));
-		record.setFirstname(Randomizer.randomString(20));
-		record.setIsuseractive(Randomizer.randomBoolean());
-		record.setIsusernotlocked(Randomizer.randomBoolean());
-		record.setJoindate(Randomizer.randomDate());
-		record.setLastlogindate(Randomizer.randomDate());
-		record.setLastlogindatedisplay(Randomizer.randomDate());
-		record.setLastname(Randomizer.randomString(20));
+		record.setEmailAddr(Randomizer.randomString(20));
+		record.setFirstName(Randomizer.randomString(20));
+		record.setUserActive(Randomizer.randomBoolean());
+		record.setUserNotLocked(Randomizer.randomBoolean());
+		record.setJoinDate(Randomizer.randomDate());
+		record.setLastLoginDate(Randomizer.randomDate());
+		record.setLastLoginDateDisplay(Randomizer.randomDate());
+		record.setLastName(Randomizer.randomString(20));
 		record.setPassword(Randomizer.randomString(20));
-		record.setProfileimage(Randomizer.randomString(20));
+		record.setProfileImage(Randomizer.randomString(20));
 		record.setRoles(Randomizer.randomString(20));
-		record.setUseridentifier(Randomizer.randomString(20));
-		record.setUsername(Randomizer.randomString(20));
+		record.setUserIdentifier(Randomizer.randomString(20));
+		record.setUserName(Randomizer.randomString(20));
 		return record;
 	}
 }

@@ -13,8 +13,6 @@ import org.apache.logging.log4j.Logger;
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class ResourceNotFoundException extends RuntimeException {
 
-	//private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
-
 	public ResourceNotFoundException(String message) {
 		super(message);
 	}

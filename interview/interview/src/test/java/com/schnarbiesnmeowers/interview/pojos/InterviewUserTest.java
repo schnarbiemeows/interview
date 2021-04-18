@@ -27,36 +27,36 @@ public class InterviewUserTest {
 		String[] stringarray = new String[1];
 		stringarray[0] = Randomizer.randomString(3);
 		classUnderTest.setAuthorizations(stringarray);
-		classUnderTest.setEmailaddr("a");
-		classUnderTest.setFirstname("a");
-		classUnderTest.setIsuseractive(true);
-		classUnderTest.setIsusernotlocked(true);
-		classUnderTest.setJoindate(new Date());
-		classUnderTest.setLastlogindate(new Date());
-		classUnderTest.setLastlogindatedisplay(new Date());
-		classUnderTest.setLastname("a");
+		classUnderTest.setEmailAddr("a");
+		classUnderTest.setFirstName("a");
+		classUnderTest.setUserActive(true);
+		classUnderTest.setUserNotLocked(true);
+		classUnderTest.setJoinDate(new Date());
+		classUnderTest.setLastLoginDate(new Date());
+		classUnderTest.setLastLoginDateDisplay(new Date());
+		classUnderTest.setLastName("a");
 		classUnderTest.setPassword("a");
-		classUnderTest.setProfileimage("a");
+		classUnderTest.setProfileImage("a");
 		classUnderTest.setRoles("a");
-		classUnderTest.setUseridentifier("a");
-		classUnderTest.setUsername("a");
+		classUnderTest.setUserIdentifier("a");
+		classUnderTest.setUserName("a");
 		assertTrue(true);
 		InterviewUser newitem = new InterviewUser(
 		classUnderTest.getUserId(),
 		classUnderTest.getAuthorizations(),
-		classUnderTest.getEmailaddr(),
-		classUnderTest.getFirstname(),
-		classUnderTest.getIsuseractive(),
-		classUnderTest.getIsusernotlocked(),
-		classUnderTest.getJoindate(),
-		classUnderTest.getLastlogindate(),
-		classUnderTest.getLastlogindatedisplay(),
-		classUnderTest.getLastname(),
+		classUnderTest.getEmailAddr(),
+		classUnderTest.getFirstName(),
+		classUnderTest.isUserActive(),
+		classUnderTest.isUserNotLocked(),
+		classUnderTest.getJoinDate(),
+		classUnderTest.getLastLoginDate(),
+		classUnderTest.getLastLoginDateDisplay(),
+		classUnderTest.getLastName(),
 		classUnderTest.getPassword(),
-		classUnderTest.getProfileimage(),
+		classUnderTest.getProfileImage(),
 		classUnderTest.getRoles(),
-		classUnderTest.getUseridentifier(),
-		classUnderTest.getUsername());
+		classUnderTest.getUserIdentifier(),
+		classUnderTest.getUserName());
 		assertNotNull(newitem);
 		String string = classUnderTest.toString();
 		assertNotNull(string);

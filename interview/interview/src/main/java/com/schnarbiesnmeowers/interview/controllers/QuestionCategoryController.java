@@ -1,16 +1,27 @@
 package com.schnarbiesnmeowers.interview.controllers;
 
-import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
+import java.util.List;
+
 import javax.validation.Valid;
-import java.util.*;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.schnarbiesnmeowers.interview.business.*;
-import com.schnarbiesnmeowers.interview.dtos.*;
-import com.schnarbiesnmeowers.interview.pojos.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.schnarbiesnmeowers.interview.business.QuestionCategoryBusiness;
+import com.schnarbiesnmeowers.interview.dtos.QuestionCategoryDTO;
+import com.schnarbiesnmeowers.interview.exceptions.handler.QuestionCategoryExceptionHandling;
+import com.schnarbiesnmeowers.interview.pojos.ResponseMessage;
 
 /**
  * this class is the main REST controller
@@ -20,9 +31,9 @@ import com.schnarbiesnmeowers.interview.pojos.*;
 @CrossOrigin
 @RestController
 @RequestMapping(path="/questioncategory")
-public class QuestionCategoryController {
+public class QuestionCategoryController extends QuestionCategoryExceptionHandling {
 
-	//private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
+	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
 
 	/**
 	 * JPA Repository handle
@@ -88,4 +99,8 @@ public class QuestionCategoryController {
 		return ResponseEntity.status(HttpStatus.OK).body(rb);
 	}
 
+	private static void logAction(String message) {
+    	System.out.println(message);
+    	applicationLogger.debug(message);
+    }
 }

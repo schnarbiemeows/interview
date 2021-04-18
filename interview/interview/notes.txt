@@ -1,0 +1,93 @@
+6 classes/Interfaces to Spring Security that you need to extend:
+1. AuthenticationFilter
+2. AuthenticationManager
+3. AuthenticationProvider
+4. UserDetails
+5. PasswordEncoder
+6. SecurityContext
+
+
+for spring security, start with the UserDetails
+1. UserDetails
+---------------------------------------------------------------------------------------------------------------------
+- Create a class Implementer(UserPrincipal)
+- this class should have an instance of the @Entity bean that corresponds to the database table that holds your users
+- other than that, it just needs getters for getting certain fields(like username/password) from that Entity
+* the authorizations(or permissions) are stored in the database as a String arry, however, we need a method in the UserPrincipal called
+getAuthorities(), that retrieves this array and converts each item into a class that extends GrantedAuthority(like SimpleGrantedAuthority)
+SimpleGrantedAuthority is just a wrapper class with a single field role
+YOU MUST HAVE this overriden method, because some of the core spring-security classes call this method and need these permissions passed back to them
+as an array of GrantedAuthoriy
+
+
+things that need to go into a token
+- Issuer(name of your application)
+- Audience(not sure)
+- IssuedAt(when created)
+- Subject(username)
+- ArrayClaims(authorities, or list of user permissions)
+- ExpiresAt(when expires)
+
+	a. JwtTokenProvider
+	-------------------
+to make a token from the UserPrincipal, you need JWT.create()
+to unpack, verify, and get elements from a token, you need a JWTVerifier
+need methods to :
+- make the token
+- get claims(authorizations) from the token
+- get cliams(authorizations) from the UserPrincipal
+- creating an Authentication  object from the token for putting into the SecurityContext
+- verifying the token
+-(opt.) getting the username from the token
+
+2. AuthenticationFilter
+we are using the 
+JwtAuthorizationFilter
+----------------------
+extends OncePerRequestFilter
+- needs to autorie the token provider
+- you need to first check the HttpServletRequest to see if the request method is OPTIONS, and if so, return 200
+- if the validator fails, it will trigger a 403 error, so we want another Filter that will control the 403 error message that gets
+sent out to the user, so I'll call it
+JwtFailedAuth403MessageHandler
+--------------------------------
+extends Http403ForbiddenEntryPoint 
+- the 3 parameters to the method you have to override are the request, the response and the AuthenticationException , so this explains
+how this filter is triggered by an AuthenticationException
+- you need to create an HttpResponse, set the 403 status in it(along with other stuff), write it to the output stream of the HttpServletResponse,
+	and flush the output stream
+- I can just cntrl-Click on the Http403ForbiddenEntryPoint, copy the body of the method to override into my method, and alter that, but he uses
+the HttpResponse custom class that we created specifically for error messages
+JwtAccessDeniedHandler
+-------------------------------
+implements AccessDeniedHandler
+the purpose of this handler is to give the user a custom message whenver they are trying to access
+a resource that they do not have permissions to access
+AccessDeniedException is the exception being caught by this one
+process is the same as the other one above, just we are overriding the handle method here
+
+3. Implementing the UserDetailsService
+---------------------------------------
+UserServiceImpl
+- must override the method loadUserByUsername()
+- this method is not called by our program anywhere, but is called by the spring security jars
+
+
+4. PasswordEncoder
+--------------------------------------
+- simply put a bean reference in the main method class that returns a BCryptPasswordEncoder:
+@Bean
+public BCryptPasswordEncoder bCryptPasswordEncoder() {
+	return new BCryptPasswordEncoder();
+}
+- this bean is autowired into the following classes:
+- the SecurityConfiguration class(it is needed when configuring the Authentication Manager, set it with .passwordEncoder(encoder))
+- the UserService implementer class(when a user registers, you need it to encode the newly created user's password)
+
+5. AuthenticationManager
+-------------------------------------
+this class is only called by our code during the /login controller method
+- we pass a UsernamePasswordAuthenticationToken(userName, password) into the manager, so that it can authenticate
+	against what is found in the database
+this.authManager.authenticate(new UsernamePasswordAuthenticationToken(userName, password));
+

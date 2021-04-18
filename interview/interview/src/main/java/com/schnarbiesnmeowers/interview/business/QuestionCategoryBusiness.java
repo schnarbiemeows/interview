@@ -24,7 +24,7 @@ import java.util.List;
 @Component
 public class QuestionCategoryBusiness {
 
-	//private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
+	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
     public static final String ID_EQUALS = "id = ";
     public static final String NOT_FOUND = " not found";
 	/**
@@ -113,4 +113,8 @@ public class QuestionCategoryBusiness {
 		}
 	}
 
+	private static void logAction(String message) {
+    	System.out.println(message);
+    	applicationLogger.debug(message);
+    }
 }

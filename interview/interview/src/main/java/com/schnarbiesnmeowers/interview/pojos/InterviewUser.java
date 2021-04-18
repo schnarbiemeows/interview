@@ -39,50 +39,50 @@ public class InterviewUser implements Serializable {
 	/**
 	 * 
 	 */
-	@Column(name = "emailAddr")
-	private String emailaddr;
+	@Column(name = "email_addr")
+	private String emailAddr;
 
 	/**
 	 * 
 	 */
-	@Column(name = "firstName")
-	private String firstname;
+	@Column(name = "first_name")
+	private String firstName;
 
 	/**
 	 * 
 	 */
-	@Column(name = "isUserActive")
-	private boolean isuseractive;
+	@Column(name = "user_active")
+	private boolean userActive;
 
 	/**
 	 * 
 	 */
-	@Column(name = "isUserNotLocked")
-	private boolean isusernotlocked;
+	@Column(name = "user_not_locked")
+	private boolean userNotLocked;
 
 	/**
 	 * 
 	 */
-	@Column(name = "joinDate")
-	private Date joindate;
+	@Column(name = "join_date")
+	private Date joinDate;
 
 	/**
 	 * 
 	 */
-	@Column(name = "lastLoginDate")
-	private Date lastlogindate;
+	@Column(name = "last_login_date")
+	private Date lastLoginDate;
 
 	/**
 	 * 
 	 */
-	@Column(name = "lastLoginDateDisplay")
-	private Date lastlogindatedisplay;
+	@Column(name = "last_login_date_display")
+	private Date lastLoginDateDisplay;
 
 	/**
 	 * 
 	 */
-	@Column(name = "lastName")
-	private String lastname;
+	@Column(name = "last_name")
+	private String lastName;
 
 	/**
 	 * 
@@ -93,8 +93,8 @@ public class InterviewUser implements Serializable {
 	/**
 	 * 
 	 */
-	@Column(name = "profileImage")
-	private String profileimage;
+	@Column(name = "profile_image")
+	private String profileImage;
 
 	/**
 	 * 
@@ -105,14 +105,14 @@ public class InterviewUser implements Serializable {
 	/**
 	 * 
 	 */
-	@Column(name = "userIdentifier")
-	private String useridentifier;
+	@Column(name = "user_identifier")
+	private String userIdentifier;
 
 	/**
 	 * 
 	 */
-	@Column(name = "userName")
-	private String username;
+	@Column(name = "user_name")
+	private String userName;
 
 	/**
 	 * default constructor
@@ -121,23 +121,23 @@ public class InterviewUser implements Serializable {
 		super();
 	}
 
-	public InterviewUser(Integer userId, String[] authorizations, String emailaddr, String firstname, boolean isuseractive, boolean isusernotlocked, Date joindate, Date lastlogindate, Date lastlogindatedisplay, String lastname, String password, String profileimage, String roles, String useridentifier, String username) {
+	public InterviewUser(Integer userId, String[] authorizations, String emailAddr, String firstName, boolean userActive, boolean userNotLocked, Date joinDate, Date lastLoginDate, Date lastLoginDateDisplay, String lastName, String password, String profileImage, String roles, String userIdentifier, String userName) {
 		super();
 		this.userId = userId;
 		this.authorizations = authorizations;
-		this.emailaddr = emailaddr;
-		this.firstname = firstname;
-		this.isuseractive = isuseractive;
-		this.isusernotlocked = isusernotlocked;
-		this.joindate = joindate;
-		this.lastlogindate = lastlogindate;
-		this.lastlogindatedisplay = lastlogindatedisplay;
-		this.lastname = lastname;
+		this.emailAddr = emailAddr;
+		this.firstName = firstName;
+		this.userActive = userActive;
+		this.userNotLocked = userNotLocked;
+		this.joinDate = joinDate;
+		this.lastLoginDate = lastLoginDate;
+		this.lastLoginDateDisplay = lastLoginDateDisplay;
+		this.lastName = lastName;
 		this.password = password;
-		this.profileimage = profileimage;
+		this.profileImage = profileImage;
 		this.roles = roles;
-		this.useridentifier = useridentifier;
-		this.username = username;
+		this.userIdentifier = userIdentifier;
+		this.userName = userName;
 	}
 
 	public Integer getUserId() {
@@ -156,68 +156,68 @@ public class InterviewUser implements Serializable {
 		this.authorizations=authorizations;
 	}
 
-	public String getEmailaddr() {
-		return emailaddr;
+	public String getEmailAddr() {
+		return emailAddr;
 	}
 
-	public void setEmailaddr(String emailaddr) {
-		this.emailaddr=emailaddr;
+	public void setEmailAddr(String emailAddr) {
+		this.emailAddr=emailAddr;
 	}
 
-	public String getFirstname() {
-		return firstname;
+	public String getFirstName() {
+		return firstName;
 	}
 
-	public void setFirstname(String firstname) {
-		this.firstname=firstname;
+	public void setFirstName(String firstName) {
+		this.firstName=firstName;
 	}
 
-	public boolean getIsuseractive() {
-		return isuseractive;
+	public boolean isUserActive() {
+		return userActive;
 	}
 
-	public void setIsuseractive(boolean isuseractive) {
-		this.isuseractive=isuseractive;
+	public void setUserActive(boolean userActive) {
+		this.userActive=userActive;
 	}
 
-	public boolean getIsusernotlocked() {
-		return isusernotlocked;
+	public boolean isUserNotLocked() {
+		return userNotLocked;
 	}
 
-	public void setIsusernotlocked(boolean isusernotlocked) {
-		this.isusernotlocked=isusernotlocked;
+	public void setUserNotLocked(boolean userNotLocked) {
+		this.userNotLocked=userNotLocked;
 	}
 
-	public Date getJoindate() {
-		return joindate;
+	public Date getJoinDate() {
+		return joinDate;
 	}
 
-	public void setJoindate(Date joindate) {
-		this.joindate=joindate;
+	public void setJoinDate(Date joinDate) {
+		this.joinDate=joinDate;
 	}
 
-	public Date getLastlogindate() {
-		return lastlogindate;
+	public Date getLastLoginDate() {
+		return lastLoginDate;
 	}
 
-	public void setLastlogindate(Date lastlogindate) {
-		this.lastlogindate=lastlogindate;
+	public void setLastLoginDate(Date lastLoginDate) {
+		this.lastLoginDate=lastLoginDate;
 	}
 
-	public Date getLastlogindatedisplay() {
-		return lastlogindatedisplay;
+	public Date getLastLoginDateDisplay() {
+		return lastLoginDateDisplay;
 	}
 
-	public void setLastlogindatedisplay(Date lastlogindatedisplay) {
-		this.lastlogindatedisplay=lastlogindatedisplay;
+	public void setLastLoginDateDisplay(Date lastLoginDateDisplay) {
+		this.lastLoginDateDisplay=lastLoginDateDisplay;
 	}
 
-	public String getLastname() {
-		return lastname;
+	public String getLastName() {
+		return lastName;
 	}
 
-	public void setLastname(String lastname) {
-		this.lastname=lastname;
+	public void setLastName(String lastName) {
+		this.lastName=lastName;
 	}
 
 	public String getPassword() {
@@ -228,12 +228,12 @@ public class InterviewUser implements Serializable {
 		this.password=password;
 	}
 
-	public String getProfileimage() {
-		return profileimage;
+	public String getProfileImage() {
+		return profileImage;
 	}
 
-	public void setProfileimage(String profileimage) {
-		this.profileimage=profileimage;
+	public void setProfileImage(String profileImage) {
+		this.profileImage=profileImage;
 	}
 
 	public String getRoles() {
@@ -244,25 +244,25 @@ public class InterviewUser implements Serializable {
 		this.roles=roles;
 	}
 
-	public String getUseridentifier() {
-		return useridentifier;
+	public String getUserIdentifier() {
+		return userIdentifier;
 	}
 
-	public void setUseridentifier(String useridentifier) {
-		this.useridentifier=useridentifier;
+	public void setUserIdentifier(String userIdentifier) {
+		this.userIdentifier=userIdentifier;
 	}
 
-	public String getUsername() {
-		return username;
+	public String getUserName() {
+		return userName;
 	}
 
-	public void setUsername(String username) {
-		this.username=username;
+	public void setUserName(String userName) {
+		this.userName=userName;
 	}
 
 	@Override
 	public String toString() {
-		return "InterviewUser [userId=" + userId + ", authorizations=" + authorizations + ", emailaddr=" + emailaddr + ", firstname=" + firstname + ", isuseractive=" + isuseractive + ", isusernotlocked=" + isusernotlocked + ", joindate=" + joindate + ", lastlogindate=" + lastlogindate + ", lastlogindatedisplay=" + lastlogindatedisplay + ", lastname=" + lastname + ", password=" + password + ", profileimage=" + profileimage + ", roles=" + roles + ", useridentifier=" + useridentifier + ", username=" + username + "]";
+		return "InterviewUser [userId=" + userId + ", authorizations=" + authorizations + ", emailAddr=" + emailAddr + ", firstName=" + firstName + ", userActive=" + userActive + ", userNotLocked=" + userNotLocked + ", joinDate=" + joinDate + ", lastLoginDate=" + lastLoginDate + ", lastLoginDateDisplay=" + lastLoginDateDisplay + ", lastName=" + lastName + ", password=" + password + ", profileImage=" + profileImage + ", roles=" + roles + ", userIdentifier=" + userIdentifier + ", userName=" + userName + "]";
 	}
 
 	public static InterviewUser fromJson(String input) {
@@ -270,6 +270,6 @@ public class InterviewUser implements Serializable {
 		return gson.fromJson(input, InterviewUser.class );
 	}
 	public InterviewUserDTO toDTO() {
-		return new InterviewUserDTO(this.getUserId(),this.getAuthorizations(),this.getEmailaddr(),this.getFirstname(),this.getIsuseractive(),this.getIsusernotlocked(),this.getJoindate(),this.getLastlogindate(),this.getLastlogindatedisplay(),this.getLastname(),this.getPassword(),this.getProfileimage(),this.getRoles(),this.getUseridentifier(),this.getUsername());
+		return new InterviewUserDTO(this.getUserId(),this.getAuthorizations(),this.getEmailAddr(),this.getFirstName(),this.isUserActive(),this.isUserNotLocked(),this.getJoinDate(),this.getLastLoginDate(),this.getLastLoginDateDisplay(),this.getLastName(),this.getPassword(),this.getProfileImage(),this.getRoles(),this.getUserIdentifier(),this.getUserName());
 	}
 }

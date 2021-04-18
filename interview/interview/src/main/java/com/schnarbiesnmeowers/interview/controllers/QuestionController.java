@@ -22,7 +22,7 @@ import com.schnarbiesnmeowers.interview.pojos.*;
 @RequestMapping(path="/question")
 public class QuestionController {
 
-	//private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
+	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
 
 	/**
 	 * JPA Repository handle
@@ -136,4 +136,8 @@ public class QuestionController {
 		return ResponseEntity.status(HttpStatus.OK).body(results);
 	}
 
+	private static void logAction(String message) {
+    	System.out.println(message);
+    	applicationLogger.debug(message);
+    }
 }
