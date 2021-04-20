@@ -91,3 +91,18 @@ this class is only called by our code during the /login controller method
 	against what is found in the database
 this.authManager.authenticate(new UsernamePasswordAuthenticationToken(userName, password));
 
+
+
+Front end
+---------------------------------------------------------------------------------------------------------------------------------------
+- configure you environment variable in environments/environment.ts
+1. Interceptors
+----------------------------
+HttpInterceptor - this is what you want to use in order to add the token to every header for every request
+ng g interceptor <name>
+- interceptors have to be added to the providers section in the app.module
+
+*** Note: anything that is annotated with @Injectable	is a service, and therefore must be added to the providers array in app.module
+
+2. Guards
+----------------------------

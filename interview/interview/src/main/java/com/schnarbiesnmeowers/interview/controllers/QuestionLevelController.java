@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +47,7 @@ public class QuestionLevelController extends QuestionLevelExceptionHandling {
 	 * @return Iterable<QuestionLevel>
 	 */
 	@GetMapping(path = "/all")
+	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<List<QuestionLevelDTO>> getAllQuestionLevel() throws Exception {
 		List<QuestionLevelDTO> questionlevel = businessService.getAllQuestionLevel();
 		return ResponseEntity.status(HttpStatus.OK).body(questionlevel);
@@ -57,6 +59,7 @@ public class QuestionLevelController extends QuestionLevelExceptionHandling {
 	 * @return QuestionLevel
 	 */
 	@GetMapping(path = "/findById/{id}")
+	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<QuestionLevelDTO> findQuestionLevelById(@PathVariable int id) throws Exception {
 		QuestionLevelDTO results = businessService.findQuestionLevelById(id);
 		return ResponseEntity.status(HttpStatus.OK).body(results);
@@ -68,6 +71,7 @@ public class QuestionLevelController extends QuestionLevelExceptionHandling {
 	 * @return QuestionLevel
 	 */
 	@PostMapping(path = "/create")
+	@PreAuthorize("hasAnyAuthority('data:create')")
 	public ResponseEntity<QuestionLevelDTO> createQuestionLevel(@Valid @RequestBody QuestionLevelDTO data) throws Exception {
 		try {
 		    QuestionLevelDTO createdData = businessService.createQuestionLevel(data);
@@ -83,6 +87,7 @@ public class QuestionLevelController extends QuestionLevelExceptionHandling {
 	 * @return QuestionLevel
 	 */
 	@PostMapping(path = "/update")
+	@PreAuthorize("hasAnyAuthority('data:update')")
 	public ResponseEntity<QuestionLevelDTO> updateQuestionLevel(@Valid @RequestBody QuestionLevelDTO data) throws Exception {
 		QuestionLevelDTO updatedData = businessService.updateQuestionLevel(data);
 		return ResponseEntity.status(HttpStatus.OK).body(updatedData);
@@ -93,6 +98,7 @@ public class QuestionLevelController extends QuestionLevelExceptionHandling {
 	 * @param id
 	 */
 	@DeleteMapping(path = "/delete/{id}")
+	@PreAuthorize("hasAnyAuthority('data:delete')")
 	public ResponseEntity<ResponseMessage> deleteQuestionLevel(@PathVariable int id) throws Exception {
 		businessService.deleteQuestionLevel(id);
 		ResponseMessage rb = new ResponseMessage("successfully deleted");

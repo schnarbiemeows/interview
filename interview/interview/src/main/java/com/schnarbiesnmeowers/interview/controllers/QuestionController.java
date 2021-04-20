@@ -3,6 +3,7 @@ package com.schnarbiesnmeowers.interview.controllers;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.HttpStatus;
 import javax.validation.Valid;
 import java.util.*;
@@ -35,6 +36,7 @@ public class QuestionController {
 	 * @return Iterable<Question>
 	 */
 	@GetMapping(path = "/all")
+	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<List<QuestionDTO>> getAllQuestion() throws Exception {
 		List<QuestionDTO> question = businessService.getAllQuestion();
 		return ResponseEntity.status(HttpStatus.OK).body(question);
@@ -46,6 +48,7 @@ public class QuestionController {
 	 * @return Question
 	 */
 	@GetMapping(path = "/findById/{id}")
+	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<QuestionDTO> findQuestionById(@PathVariable int id) throws Exception {
 		QuestionDTO results = businessService.findQuestionById(id);
 		return ResponseEntity.status(HttpStatus.OK).body(results);
@@ -57,6 +60,7 @@ public class QuestionController {
 	 * @return Question
 	 */
 	@PostMapping(path = "/create")
+	@PreAuthorize("hasAnyAuthority('data:create')")
 	public ResponseEntity<QuestionDTO> createQuestion(@Valid @RequestBody QuestionDTO data) throws Exception {
 		try {
 		    QuestionDTO createdData = businessService.createQuestion(data);
@@ -72,6 +76,7 @@ public class QuestionController {
 	 * @return Question
 	 */
 	@PostMapping(path = "/update")
+	@PreAuthorize("hasAnyAuthority('data:update')")
 	public ResponseEntity<QuestionDTO> updateQuestion(@Valid @RequestBody QuestionDTO data) throws Exception {
 		QuestionDTO updatedData = businessService.updateQuestion(data);
 		return ResponseEntity.status(HttpStatus.OK).body(updatedData);
@@ -82,6 +87,7 @@ public class QuestionController {
 	 * @param id
 	 */
 	@DeleteMapping(path = "/delete/{id}")
+	@PreAuthorize("hasAnyAuthority('data:delete')")
 	public ResponseEntity<ResponseMessage> deleteQuestion(@PathVariable int id) throws Exception {
 		businessService.deleteQuestion(id);
 		ResponseMessage rb = new ResponseMessage("successfully deleted");
@@ -95,6 +101,7 @@ public class QuestionController {
 	 * @throws Exception
 	*/
 	@GetMapping(path = "/findByQuestionCategoryId/{id}")
+	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<List<QuestionDTO>> findQuestionByQuestionCategoryId(@PathVariable int id) throws Exception {
 		List<QuestionDTO> results = businessService.findQuestionByQuestionCategoryId(id);
 		return ResponseEntity.status(HttpStatus.OK).body(results);
@@ -107,6 +114,7 @@ public class QuestionController {
 	 * @throws Exception
 	*/
 	@GetMapping(path = "/findByQuestionLevelId/{id}")
+	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<List<QuestionDTO>> findQuestionByQuestionLevelId(@PathVariable int id) throws Exception {
 		List<QuestionDTO> results = businessService.findQuestionByQuestionLevelId(id);
 		return ResponseEntity.status(HttpStatus.OK).body(results);
@@ -119,6 +127,7 @@ public class QuestionController {
 	 * @throws Exception
 	*/
 	@GetMapping(path = "/findByAnswerId/{id}")
+	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<List<QuestionDTO>> findQuestionByAnswerId(@PathVariable int id) throws Exception {
 		List<QuestionDTO> results = businessService.findQuestionByAnswerId(id);
 		return ResponseEntity.status(HttpStatus.OK).body(results);
@@ -131,6 +140,7 @@ public class QuestionController {
 	 * @throws Exception
 	*/
 	@GetMapping(path = "/findByQuestionCategoryIdAndQuestionLevelIdAndAnswerId/{id0}/{id1}/{id2}")
+	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<List<QuestionDTO>> findQuestionByQuestionCategoryIdAndQuestionLevelIdAndAnswerId(@PathVariable int id0, @PathVariable int id1, @PathVariable int id2) throws Exception {
 		List<QuestionDTO> results = businessService.findQuestionByQuestionCategoryIdAndQuestionLevelIdAndAnswerId(id0, id1, id2);
 		return ResponseEntity.status(HttpStatus.OK).body(results);

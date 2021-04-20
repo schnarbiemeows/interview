@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +47,7 @@ public class QuestionCategoryController extends QuestionCategoryExceptionHandlin
 	 * @return Iterable<QuestionCategory>
 	 */
 	@GetMapping(path = "/all")
+	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<List<QuestionCategoryDTO>> getAllQuestionCategory() throws Exception {
 		List<QuestionCategoryDTO> questioncategory = businessService.getAllQuestionCategory();
 		return ResponseEntity.status(HttpStatus.OK).body(questioncategory);
@@ -57,6 +59,7 @@ public class QuestionCategoryController extends QuestionCategoryExceptionHandlin
 	 * @return QuestionCategory
 	 */
 	@GetMapping(path = "/findById/{id}")
+	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<QuestionCategoryDTO> findQuestionCategoryById(@PathVariable int id) throws Exception {
 		QuestionCategoryDTO results = businessService.findQuestionCategoryById(id);
 		return ResponseEntity.status(HttpStatus.OK).body(results);
@@ -68,6 +71,7 @@ public class QuestionCategoryController extends QuestionCategoryExceptionHandlin
 	 * @return QuestionCategory
 	 */
 	@PostMapping(path = "/create")
+	@PreAuthorize("hasAnyAuthority('data:create')")
 	public ResponseEntity<QuestionCategoryDTO> createQuestionCategory(@Valid @RequestBody QuestionCategoryDTO data) throws Exception {
 		try {
 		    QuestionCategoryDTO createdData = businessService.createQuestionCategory(data);
@@ -83,6 +87,7 @@ public class QuestionCategoryController extends QuestionCategoryExceptionHandlin
 	 * @return QuestionCategory
 	 */
 	@PostMapping(path = "/update")
+	@PreAuthorize("hasAnyAuthority('data:update')")
 	public ResponseEntity<QuestionCategoryDTO> updateQuestionCategory(@Valid @RequestBody QuestionCategoryDTO data) throws Exception {
 		QuestionCategoryDTO updatedData = businessService.updateQuestionCategory(data);
 		return ResponseEntity.status(HttpStatus.OK).body(updatedData);
@@ -93,6 +98,7 @@ public class QuestionCategoryController extends QuestionCategoryExceptionHandlin
 	 * @param id
 	 */
 	@DeleteMapping(path = "/delete/{id}")
+	@PreAuthorize("hasAnyAuthority('data:delete')")
 	public ResponseEntity<ResponseMessage> deleteQuestionCategory(@PathVariable int id) throws Exception {
 		businessService.deleteQuestionCategory(id);
 		ResponseMessage rb = new ResponseMessage("successfully deleted");

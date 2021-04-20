@@ -31,6 +31,6 @@ public class Authorizations {
 			"self:lvl1", "self:lvl2", "admin:select","adminself:update","user:select","user:update",
 			"user:create","user:delete" };
 	public static final String[] SUPER_ADMIN_AUTH = { "data:select","data:update","data:create","data:delete", 
-			"self:lvl1", "self:lvl2", "admin:select","adminself:update", "admin:update","admin:create","admin:delte",
+			"self:lvl1", "self:lvl2", "admin:select","adminself:update", "admin:update","admin:create","admin:delete",
 			"user:select","user:update","user:create","user:delete", };
 }

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -142,6 +143,7 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	 * @return Iterable<InterviewUser>
 	 */
 	@GetMapping(path = "/all")
+	@PreAuthorize("hasAnyAuthority('admin:select')")
 	public ResponseEntity<List<InterviewUserDTO>> getAllInterviewUser() throws Exception {
 		List<InterviewUserDTO> interviewuser = businessService.getAllInterviewUser();
 		return ResponseEntity.status(HttpStatus.OK).body(interviewuser);
@@ -153,6 +155,7 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	 * @return InterviewUser
 	 */
 	@GetMapping(path = "/findById/{id}")
+	@PreAuthorize("hasAnyAuthority('admin:select')")
 	public ResponseEntity<InterviewUserDTO> findInterviewUserById(@PathVariable int id) throws Exception {
 		InterviewUserDTO results = businessService.findInterviewUserById(id);
 		return ResponseEntity.status(HttpStatus.OK).body(results);
@@ -164,6 +167,7 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	 * @return InterviewUser
 	 */
 	@PostMapping(path = "/create")
+	@PreAuthorize("hasAnyAuthority('admin:create')")
 	public ResponseEntity<InterviewUserDTO> createInterviewUser(@Valid @RequestBody InterviewUserDTO data) throws Exception {
 		try {
 		    InterviewUserDTO createdData = businessService.createInterviewUser(data);
@@ -179,6 +183,7 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	 * @return InterviewUser
 	 */
 	@PostMapping(path = "/update")
+	@PreAuthorize("hasAnyAuthority('admin:update')")
 	public ResponseEntity<InterviewUserDTO> updateInterviewUser(@Valid @RequestBody InterviewUserDTO data) throws Exception {
 		InterviewUserDTO updatedData = businessService.updateInterviewUser(data);
 		return ResponseEntity.status(HttpStatus.OK).body(updatedData);
@@ -189,6 +194,7 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	 * @param id
 	 */
 	@DeleteMapping(path = "/delete/{id}")
+	@PreAuthorize("hasAnyAuthority('admin:delete')")
 	public ResponseEntity<ResponseMessage> deleteInterviewUser(@PathVariable int id) throws Exception {
 		businessService.deleteInterviewUser(id);
 		ResponseMessage rb = new ResponseMessage("successfully deleted");

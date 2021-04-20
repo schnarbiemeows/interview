@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +47,7 @@ public class AnswerController extends AnswerExceptionHandling {
 	 * @return Iterable<Answer>
 	 */
 	@GetMapping(path = "/all")
+	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<List<AnswerDTO>> getAllAnswer() throws Exception {
 		List<AnswerDTO> answer = businessService.getAllAnswer();
 		return ResponseEntity.status(HttpStatus.OK).body(answer);
@@ -57,6 +59,7 @@ public class AnswerController extends AnswerExceptionHandling {
 	 * @return Answer
 	 */
 	@GetMapping(path = "/findById/{id}")
+	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<AnswerDTO> findAnswerById(@PathVariable int id) throws Exception {
 		AnswerDTO results = businessService.findAnswerById(id);
 		return ResponseEntity.status(HttpStatus.OK).body(results);
@@ -68,6 +71,7 @@ public class AnswerController extends AnswerExceptionHandling {
 	 * @return Answer
 	 */
 	@PostMapping(path = "/create")
+	@PreAuthorize("hasAnyAuthority('data:create')")
 	public ResponseEntity<AnswerDTO> createAnswer(@Valid @RequestBody AnswerDTO data) throws Exception {
 		try {
 		    AnswerDTO createdData = businessService.createAnswer(data);
@@ -83,6 +87,7 @@ public class AnswerController extends AnswerExceptionHandling {
 	 * @return Answer
 	 */
 	@PostMapping(path = "/update")
+	@PreAuthorize("hasAnyAuthority('data:update')")
 	public ResponseEntity<AnswerDTO> updateAnswer(@Valid @RequestBody AnswerDTO data) throws Exception {
 		AnswerDTO updatedData = businessService.updateAnswer(data);
 		return ResponseEntity.status(HttpStatus.OK).body(updatedData);
@@ -93,6 +98,7 @@ public class AnswerController extends AnswerExceptionHandling {
 	 * @param id
 	 */
 	@DeleteMapping(path = "/delete/{id}")
+	@PreAuthorize("hasAnyAuthority('data:delete')")
 	public ResponseEntity<ResponseMessage> deleteAnswer(@PathVariable int id) throws Exception {
 		businessService.deleteAnswer(id);
 		ResponseMessage rb = new ResponseMessage("successfully deleted");
