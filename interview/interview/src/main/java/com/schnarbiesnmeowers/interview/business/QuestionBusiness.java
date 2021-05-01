@@ -1,20 +1,26 @@
 package com.schnarbiesnmeowers.interview.business;
 
-import java.util.Optional;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import com.schnarbiesnmeowers.interview.exceptions.ResourceNotFoundException;
+import javax.validation.Valid;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.schnarbiesnmeowers.interview.dtos.QuestionAnswerItemDTO;
 import com.schnarbiesnmeowers.interview.dtos.QuestionDTO;
+import com.schnarbiesnmeowers.interview.exceptions.ResourceNotFoundException;
+import com.schnarbiesnmeowers.interview.pojos.Answer;
 import com.schnarbiesnmeowers.interview.pojos.Question;
+import com.schnarbiesnmeowers.interview.services.AnswerRepository;
 import com.schnarbiesnmeowers.interview.services.QuestionRepository;
-import java.util.List;
 /**
  * this class retrieves data from the controller class
  * most business logic should be put in this class
@@ -32,6 +38,12 @@ public class QuestionBusiness {
 	 */
 	@Autowired
 	private QuestionRepository service;
+	
+	/**
+	 * JPA Repository handle
+	 */
+	@Autowired
+	private AnswerRepository answerService;
 
 	/**
 	 * get all Question records
@@ -185,4 +197,46 @@ public class QuestionBusiness {
     	System.out.println(message);
     	applicationLogger.debug(message);
     }
+
+	/**
+	 * 
+	 * @param data
+	 * @return
+	 */
+	public QuestionAnswerItemDTO createQuestionAnswerPair(@Valid QuestionAnswerItemDTO data) throws Exception {
+		Answer answer = new Answer();
+		answer.setAnswerTxt(data.getAnswerTxt());
+		answer.setEvntOperId(data.getEvntOperId());
+		answer.setEvntTmestmp(new Date());
+		answer = answerService.save(answer);
+	    Question question = new Question();
+	    question.setAnswerId(answer.getAnswerId());
+	    question.setEvntOperId(data.getEvntOperId());
+	    question.setEvntTmestmp(new Date());
+	    question.setQuestionCategoryId(data.getQuestionCategoryId());
+	    question.setQuestionLevelId(data.getQuestionLevelId());
+	    question.setQuestionTxt(data.getQuestionTxt());
+	    question = service.save(question);
+	    
+	    data.setAnswerId(answer.getAnswerId());
+	    data.setQuestionId(question.getQuestionId());
+	    return data;
+	}
+
+	public QuestionAnswerItemDTO updateQuestionAnswerPair(@Valid QuestionAnswerItemDTO data) throws Exception {
+		Answer answer = answerService.getOne(data.getAnswerId());
+		answer.setAnswerTxt(data.getAnswerTxt());
+		answer.setEvntTmestmp(new Date());
+		answer.setEvntOperId(data.getEvntOperId());
+		answer = answerService.save(answer);
+		Question question = service.getOne(data.getQuestionId());
+		question.setQuestionCategoryId(data.getQuestionCategoryId());
+	    question.setQuestionLevelId(data.getQuestionLevelId());
+	    question.setQuestionTxt(data.getQuestionTxt());
+	    question.setAnswerId(answer.getAnswerId());
+	    question.setEvntOperId(data.getEvntOperId());
+	    question.setEvntTmestmp(new Date());
+	    question = service.save(question);
+		return data;
+	}
 }

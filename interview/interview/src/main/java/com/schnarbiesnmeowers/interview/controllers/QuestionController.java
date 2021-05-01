@@ -71,6 +71,22 @@ public class QuestionController {
 	}
 
 	/**
+	 * create a new Question
+	 * @param QuestionDTO
+	 * @return Question
+	 */
+	@PostMapping(path = "/createpair")
+	@PreAuthorize("hasAnyAuthority('data:create')")
+	public ResponseEntity<QuestionAnswerItemDTO> createQuestionAnswerPair(@Valid @RequestBody QuestionAnswerItemDTO data) throws Exception {
+		try {
+			QuestionAnswerItemDTO createdData = businessService.createQuestionAnswerPair(data);
+		    return ResponseEntity.status(HttpStatus.CREATED).body(createdData);
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+	
+	/**
 	 * update a Question
 	 * @param QuestionDTO
 	 * @return Question
@@ -82,6 +98,18 @@ public class QuestionController {
 		return ResponseEntity.status(HttpStatus.OK).body(updatedData);
 	}
 
+	/**
+	 * update a Question
+	 * @param QuestionDTO
+	 * @return Question
+	 */
+	@PostMapping(path = "/updatepair")
+	@PreAuthorize("hasAnyAuthority('data:update')")
+	public ResponseEntity<QuestionAnswerItemDTO> updateQuestionAnswerPair(@Valid @RequestBody QuestionAnswerItemDTO data) throws Exception {
+		QuestionAnswerItemDTO updatedData = businessService.updateQuestionAnswerPair(data);
+		return ResponseEntity.status(HttpStatus.OK).body(updatedData);
+	}
+	
 	/**
 	 * delete a Question by primary key
 	 * @param id

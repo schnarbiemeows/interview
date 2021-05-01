@@ -28,7 +28,11 @@ import org.springframework.stereotype.Service;
 import com.sun.mail.smtp.SMTPTransport;
 
 /**
- * 
+ * Email service class
+ * sends emails for:
+ * sending the user a new password
+ * sending the user their username
+ * informing the admins when a user locks themselves out of their account
  * @author dylan
  *
  */
@@ -45,7 +49,7 @@ public class EmailService {
 	private String cc;
 	
 	/**
-	 * 
+	 * method to send an email to the user with a new password in it
 	 * @param firstName
 	 * @param password
 	 * @param email
@@ -53,13 +57,37 @@ public class EmailService {
 	 * @throws AddressException 
 	 */
 	public void sendNewPasswordEmail(String firstName, String password, String email) throws AddressException, MessagingException {
-		Message message = createEmail(firstName,password,email);
+		String messageToSend = "Hello " + firstName + ", \n \n Your new account password is: " + password + " \n \n The Support Team";
+		Message message = createEmail(firstName,password,email,messageToSend);
 		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
 		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
 		transport.sendMessage(message, message.getAllRecipients());
 		transport.close();		
 	}
 	
+	/**
+	 * method to send an email to the user with their username in it
+	 * @param firstName
+	 * @param username
+	 * @param email
+	 * @throws AddressException
+	 * @throws MessagingException
+	 */
+	public void sendEmailWithUsername(String firstName, String username, String email) throws AddressException, MessagingException {
+		String messageToSend = "Hello " + firstName + ", \n \n Your username is: " + username + " \n \n The Support Team";
+		Message message = createEmail(firstName,username,email,messageToSend);
+		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
+		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
+		transport.sendMessage(message, message.getAllRecipients());
+		transport.close();		
+	}
+	
+	/**
+	 * method to send an email to the admins when a user locks themselves out of their account
+	 * @param user
+	 * @throws AddressException
+	 * @throws MessagingException
+	 */
 	public void sendEmailForLockedAccount(String user) throws AddressException, MessagingException {
 		Message message = createLockedAccountEmail(user);
 		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
@@ -67,11 +95,11 @@ public class EmailService {
 		transport.sendMessage(message, message.getAllRecipients());
 		transport.close();		
 	}
+	
 	/**
-	 * 
+	 * method to get the email section
 	 * @return
 	 */
-	
 	private Session getEmailSession() {
 		Properties properties = System.getProperties();
 		properties.put(SMTP_HOST ,GMAIL_SMTP_SERVER );
@@ -83,26 +111,34 @@ public class EmailService {
 	}
 	
 	/**
-	 * 
+	 * method to create the Message email object
 	 * @param firstName
 	 * @param password
 	 * @param email
+	 * @param messageToSend
 	 * @return
 	 * @throws AddressException
 	 * @throws MessagingException
 	 */
-	private Message createEmail(String firstName, String password, String email) throws AddressException, MessagingException {
+	private Message createEmail(String firstName, String password, String email,String messageToSend) throws AddressException, MessagingException {
 		Message message = new MimeMessage(getEmailSession());
 		message.setFrom(new InternetAddress(FROM_EMAIL));
 		message.setRecipients(Message.RecipientType.TO,InternetAddress.parse(email,false));
 		message.setRecipients(Message.RecipientType.CC,InternetAddress.parse(cc,false));
 		message.setSubject(EMAIL_SUBJECT);
-		message.setText("Hello " + firstName + ", \n \n Your new account password is: " + password + " \n \n The Support Team");
+		message.setText(messageToSend);
 		message.setSentDate(new Date());
 		message.saveChanges();
 		return message;
 	}
 	
+	/**
+	 * method to create the Message email object for a "Locked account" email
+	 * @param username
+	 * @return
+	 * @throws AddressException
+	 * @throws MessagingException
+	 */
 	private Message createLockedAccountEmail(String username) throws AddressException, MessagingException {
 		Message message = new MimeMessage(getEmailSession());
 		message.setFrom(new InternetAddress(FROM_EMAIL));

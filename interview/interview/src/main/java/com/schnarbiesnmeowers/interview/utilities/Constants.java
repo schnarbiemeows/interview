@@ -16,12 +16,14 @@ public class Constants {
     public static final String FORBIDDEN_MESSAGE = "Please log in to access this page";
     public static final String ACCESS_DENIED_MESSAGE = "You do not have permission to access this page";
     public static final String OPTIONS_HTTP_METHOD = "OPTIONS";
-    public static final String[] PUBLIC_URLS = { "/interviewuser/login", "/interviewuser/register", "/interviewuser/image/**", "/interviewuser/setpwd","/interviewuser/setrole" };
+    public static final String[] PUBLIC_URLS = { "/interviewuser/login", "/interviewuser/register", "/interviewuser/forgotpassword/**",
+    		"/interviewuser/forgotusername/**", "/interviewuser/image/**", "/interviewuser/setpwd","/interviewuser/setrole" };
     public static final String USER_NOT_FOUND = "User not found";
     //public static final String[] PUBLIC_URLS = { "**" };
 	//public static final String USER_IMAGE_PROFILE_DEFAULT = "/user/image/profile/";
 	public static final String NO_USER_FOUND_BY_USERNAME = "No user found with that username : ";
 	public static final String NO_USER_FOUND_BY_EMAIL = "No user found with that email address : ";
+	public static final String INCORRECT_OLD_PASSWORD = "The current password that you entered was incorrect.";
 	public static final String USERNAME_ALREADY_EXISTS = "Username already exists!";
 	public static final String A_USER_WITH_THIS_EMAIL_ALREADY_EXISTS = "A user with this email already exists!";
 	

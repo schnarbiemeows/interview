@@ -31,6 +31,7 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailExistsException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailNotFoundException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.NotAnImageFileException;
+import com.schnarbiesnmeowers.interview.exceptions.interviewuser.PasswordIncorrectException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UserFieldsNotValidException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UserNotFoundException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UsernameExistsException;
@@ -51,6 +52,7 @@ public class InterviewUserExceptionHandling implements ErrorController {
     private static final String ACCOUNT_DISABLED = "Your account has been disabled. If this is an error, please contact your administrator.";
     private static final String ERROR_PROCESSING_FILE = "An error occurred while processing this file.";
     private static final String NOT_ENOUGH_PERMISSION = "You do not have enough permissions to perform this action.";
+    private static final String INCORRECT_OLD_PASSWORD = "The current password that you entered was incorrect.";
     public static final String ERROR_PATH = "/error";
 
     @ExceptionHandler(DisabledException.class)
@@ -144,6 +146,11 @@ public class InterviewUserExceptionHandling implements ErrorController {
         return createHttpResponse(INTERNAL_SERVER_ERROR, ERROR_PROCESSING_FILE);
     }
 
+    @ExceptionHandler(PasswordIncorrectException.class)
+    public ResponseEntity<HttpResponse> incorrectOldPasswordException() {
+        return createHttpResponse(BAD_REQUEST, INCORRECT_OLD_PASSWORD);
+    }
+    
     private ResponseEntity<HttpResponse> createHttpResponse(HttpStatus httpStatus, String message) {
         return new ResponseEntity<>(new HttpResponse(httpStatus.value(), httpStatus,
                 httpStatus.getReasonPhrase().toUpperCase(), message), httpStatus);

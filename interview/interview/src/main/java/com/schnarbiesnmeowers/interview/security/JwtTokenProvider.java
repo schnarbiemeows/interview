@@ -84,7 +84,7 @@ public class JwtTokenProvider {
 	 * @param token
 	 * @return
 	 */
-	private String[] getClaimsFromToken(String token) {
+	public String[] getClaimsFromToken(String token) {
 		JWTVerifier verifier = getVerifier();
 		return verifier.verify(token).getClaim(Constants.AUTHORITIES).asArray(String.class);
 	}
@@ -152,4 +152,5 @@ public class JwtTokenProvider {
 		JWTVerifier verifier = getVerifier();
 		return verifier.verify(token).getSubject();
 	}
+	
 }

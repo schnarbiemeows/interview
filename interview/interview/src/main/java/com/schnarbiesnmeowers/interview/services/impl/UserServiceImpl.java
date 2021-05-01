@@ -1,7 +1,6 @@
 package com.schnarbiesnmeowers.interview.services.impl;
 
 import static com.schnarbiesnmeowers.interview.utilities.Constants.A_USER_WITH_THIS_EMAIL_ALREADY_EXISTS;
-import static com.schnarbiesnmeowers.interview.utilities.Constants.DEFAULT_USER_IMAGE_PATH;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.DIRECTORY_CREATED;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.DOT;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.FILE_SAVED_IN_FILE_SYSTEM;
@@ -14,6 +13,7 @@ import static com.schnarbiesnmeowers.interview.utilities.Constants.USERNAME_ALRE
 import static com.schnarbiesnmeowers.interview.utilities.Constants.USER_FOLDER;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.USER_IMAGE_PATH;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.USER_NOT_FOUND;
+import static com.schnarbiesnmeowers.interview.utilities.Constants.INCORRECT_OLD_PASSWORD;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.springframework.http.MediaType.IMAGE_GIF_VALUE;
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
@@ -47,9 +47,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.schnarbiesnmeowers.interview.dtos.InterviewUserDTOWrapper;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailExistsException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailNotFoundException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.NotAnImageFileException;
+import com.schnarbiesnmeowers.interview.exceptions.interviewuser.PasswordIncorrectException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UserNotFoundException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UsernameExistsException;
 import com.schnarbiesnmeowers.interview.pojos.InterviewUser;
@@ -196,20 +198,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 }
 	 
 	
-	/*
-	 * public void setRole(String username) { InterviewUser user =
-	 * repository.findUserByUserName(username);
-	 * user.setRoles(Roles.ROLE_SUPER.name());
-	 * user.setAuthorizations(Roles.ROLE_SUPER.getAuthorizations());
-	 * repository.save(user); }
-	 */
+	public void setRole(String username) { 
+		InterviewUser user = repository.findUserByUserName(username);
+		user.setRoles(Roles.ROLE_SUPER.name());
+		user.setAuthorizations(Roles.ROLE_SUPER.getAuthorizations());
+		repository.save(user);
+	 }
+	 
 	
 	/**
 	 * this method will retrieve a temporary image for the user's profile
 	 * @param username
 	 * @return
 	 */
-	private String getTemporaryImageUrl(String username) {
+	public String getTemporaryImageUrl(String username) {
 		return null;
 		// this will later need to be some generic image either in the resources folder, or in S3
 		//return ServletUriComponentsBuilder.fromCurrentContextPath().path(DEFAULT_USER_IMAGE_PATH + username).toUriString();
@@ -220,7 +222,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 * @param password
 	 * @return
 	 */
-	private String encodePassword(String password) {
+	public String encodePassword(String password) {
 		return this.passwordEncoder.encode(password);
 	}
 
@@ -237,7 +239,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 * it first checks to make sure there is not already a user with that identifier
 	 * @return
 	 */
-	private String generateUserIdentifier() {
+	public String generateUserIdentifier() {
 		String userIdentifier = "BU" ;
 		boolean validUserIdentifier = false;
 		do {
@@ -263,7 +265,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 * @throws UsernameExistsException
 	 * @throws EmailExistsException
 	 */
-	private InterviewUser validateNewUsernameAndEmail(String currentUsername, String newUsername, String newEmail) throws UserNotFoundException, UsernameExistsException, EmailExistsException {
+	public InterviewUser validateNewUsernameAndEmail(String currentUsername, String newUsername, String newEmail) throws UserNotFoundException, UsernameExistsException, EmailExistsException {
         if(StringUtils.isNotBlank(currentUsername)) {
         	// this is not a new person trying to register
         	InterviewUser currentUser = findUserByUsername(currentUsername);
@@ -410,31 +412,52 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 * @param lastName
 	 * @param username
 	 * @param email
-	 * @param role
-	 * @param isNotLocked
-	 * @param isActive
-	 * @param profileImage
 	 * @return
 	 * @throws UserNotFoundException
 	 * @throws UsernameExistsException
 	 * @throws EmailExistsException
 	 * @throws IOException
-	 * @throws NotAnImageFileException
 	 */
 	@Override
-	public InterviewUser updateUser(String currentUserName, String firstName, String lastName, String username, String email,
-			String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, NotAnImageFileException {
-		InterviewUser user = validateNewUsernameAndEmail(currentUserName,username,email);
-		user.setFirstName(firstName);
-		user.setLastName(lastName);
-		user.setUserName(username);
-		user.setEmailAddr(email);
-		user.setUserActive(isActive);
-		user.setUserNotLocked(isNotLocked);
-		user.setRoles(getRoleEnumName(role).name());
-		user.setAuthorizations(getRoleEnumName(role).getAuthorizations());
+	public InterviewUser updateUserByUser(InterviewUserDTOWrapper userInput) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, PasswordIncorrectException {
+		InterviewUser user = null;
+		/*
+		 * I am doing this below JUST IN CASE any of the "new" fields might be null; we don't want to accidently
+		 * wipe any of these fields in the database
+		 * also, this allows us flexibility on the front-end if we want to have pages/sections
+		 * where we are just updating specific fields
+		 */
+		String newUsername = userInput.getUserName();
+		String newEmail = userInput.getEmailAddr();
+		String newFirstName = userInput.getFirstName();
+		String newLastName = userInput.getLastName();
+		if(userInput.getNewUserName()!=null&&!userInput.getNewUserName().isEmpty()) {
+			newUsername = userInput.getNewUserName();
+		}
+		if(userInput.getNewEmailAddr()!=null&&!userInput.getNewEmailAddr().isEmpty()) {
+			newEmail = userInput.getNewEmailAddr();
+		}
+		if(userInput.getNewFirstName()!=null&&!userInput.getNewFirstName().isEmpty()) {
+			newFirstName = userInput.getNewFirstName();
+		}
+		if(userInput.getNewLastName()!=null&&!userInput.getNewLastName().isEmpty()) {
+			newLastName = userInput.getNewLastName();
+		}
+		user = validateNewUsernameAndEmail(userInput.getUserName(),newUsername,newEmail);
+		if(userInput.getNewPassword()!=null) {
+			String encodedPassword = encodePassword(userInput.getNewPassword());
+			/*String oldPasswordUserEntered = encodePassword(userInput.getPassword());
+			String oldPasswordFromDB = user.getPassword();
+			if(!oldPasswordFromDB.equals(oldPasswordUserEntered)) {
+				throw new PasswordIncorrectException(INCORRECT_OLD_PASSWORD);
+			}*/
+			user.setPassword(encodedPassword);
+		}
+		user.setEmailAddr(newEmail);
+		user.setUserName(newUsername);
+		user.setFirstName(newFirstName);
+		user.setLastName(newLastName);
 		repository.save(user);
-		saveProfileImage(user, profileImage);
 		return user;
 	}
 
@@ -452,7 +475,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
 	/**
-	 * 
+	 * this method will change a user's password, and send them an email with the new password in it
 	 * @param email
 	 * @throws AddressException
 	 * @throws MessagingException
@@ -467,13 +490,27 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		String password = generatePassword();
 		user.setPassword(this.encodePassword(password));
 		this.repository.save(user);
-		this.emailService.sendNewPasswordEmail(user.getFirstName(),password , email);
-		
+		this.emailService.sendNewPasswordEmail(user.getFirstName(),password , email);	
 	}
 
-
 	/**
-	 * 
+	 * this method will send the user an email with their username in it
+	 * @param email
+	 * @throws AddressException
+	 * @throws MessagingException
+	 * @throws EmailNotFoundException
+	 */
+	@Override
+	public void forgotUsername(String email) throws AddressException, MessagingException, EmailNotFoundException {
+		InterviewUser user = this.findUserByEmail(email);
+		if(user == null) {
+			throw new EmailNotFoundException(NO_USER_FOUND_BY_EMAIL + email);
+		}
+		this.emailService.sendEmailWithUsername(user.getFirstName(),user.getUserName() , email);		
+	}
+	
+	/**
+	 * method to update a user's profile image
 	 * @param username
 	 * @param profileImage
 	 * @return
@@ -491,7 +528,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	}
 
 	/**
-	 * 
+	 * method to save a user's profile image to storage
 	 * @param user
 	 * @param profileImage
 	 * @throws IOException
@@ -542,5 +579,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     	System.out.println(message);
     	applicationLogger.debug(message);
     }
+
+	
 
 }

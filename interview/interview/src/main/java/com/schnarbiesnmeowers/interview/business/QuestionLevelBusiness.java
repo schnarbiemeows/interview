@@ -1,20 +1,20 @@
 package com.schnarbiesnmeowers.interview.business;
 
-import java.util.Optional;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import com.schnarbiesnmeowers.interview.exceptions.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.schnarbiesnmeowers.interview.dtos.QuestionLevelDTO;
+import com.schnarbiesnmeowers.interview.exceptions.ResourceNotFoundException;
 import com.schnarbiesnmeowers.interview.pojos.QuestionLevel;
 import com.schnarbiesnmeowers.interview.services.QuestionLevelRepository;
-import java.util.List;
 /**
  * this class retrieves data from the controller class
  * most business logic should be put in this class
@@ -73,6 +73,7 @@ public class QuestionLevelBusiness {
 	public QuestionLevelDTO createQuestionLevel(QuestionLevelDTO data) {
 		try {
 		    QuestionLevel createdData = data.toEntity();
+		    createdData.setEvntTmestmp(new Date());
 		    createdData = service.save(createdData);
 		    return createdData.toDTO();
 		} catch (Exception e) {
@@ -90,6 +91,7 @@ public class QuestionLevelBusiness {
 		Optional<QuestionLevel> questionlevelOptional = service.findById(data.getQuestionLevelId());
 		if(questionlevelOptional.isPresent()) {
 		    QuestionLevel updatedData = data.toEntity();
+		    updatedData.setEvntTmestmp(new Date());
 			updatedData = service.save(updatedData);
 			return updatedData.toDTO();
 		} else {
