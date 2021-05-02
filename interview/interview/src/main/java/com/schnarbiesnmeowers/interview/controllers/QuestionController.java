@@ -18,7 +18,7 @@ import com.schnarbiesnmeowers.interview.pojos.*;
  * @author Dylan I. Kessler
  *
  */
-@CrossOrigin
+//@CrossOrigin
 @RestController
 @RequestMapping(path="/question")
 public class QuestionController {

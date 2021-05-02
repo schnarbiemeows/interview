@@ -51,7 +51,7 @@ import com.schnarbiesnmeowers.interview.utilities.Constants;
  * @author Dylan I. Kessler
  *
  */
-@CrossOrigin
+//@CrossOrigin
 @RestController
 @RequestMapping(path="/interviewuser")
 public class InterviewUserController extends InterviewUserExceptionHandling {

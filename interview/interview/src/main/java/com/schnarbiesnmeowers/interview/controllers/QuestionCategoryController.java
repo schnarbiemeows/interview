@@ -29,7 +29,7 @@ import com.schnarbiesnmeowers.interview.pojos.ResponseMessage;
  * @author Dylan I. Kessler
  *
  */
-@CrossOrigin
+//@CrossOrigin
 @RestController
 @RequestMapping(path="/questioncategory")
 public class QuestionCategoryController extends QuestionCategoryExceptionHandling {
