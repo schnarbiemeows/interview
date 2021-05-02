@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,6 +40,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	private UserDetailsService userDetailsService;
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
+	
+	@Value("${cors.urls}")
+	private String cors_urls;
 	
 	@Autowired
 	public SecurityConfiguration(JwtAuthorizationFilter jwtAuthorizationFilter,
@@ -91,7 +95,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200","http://24.211.152.253:4200"));
+        String[] urlsArray = cors_urls.split(",");
+        System.out.println(urlsArray);
+        configuration.setAllowedOrigins(Arrays.asList(urlsArray));
         configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(ImmutableList.of("Authorization", "Cache-Control", "Content-Type"));
