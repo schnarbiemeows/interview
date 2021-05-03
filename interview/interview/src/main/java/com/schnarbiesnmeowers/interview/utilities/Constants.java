@@ -16,7 +16,7 @@ public class Constants {
     public static final String FORBIDDEN_MESSAGE = "Please log in to access this page";
     public static final String ACCESS_DENIED_MESSAGE = "You do not have permission to access this page";
     public static final String OPTIONS_HTTP_METHOD = "OPTIONS";
-    public static final String[] PUBLIC_URLS = { "/interviewuser/login", "/interviewuser/register", "/interviewuser/forgotpassword/**",
+    public static final String[] PUBLIC_URLS = { "/healthcheck/ping", "/interviewuser/login", "/interviewuser/register", "/interviewuser/forgotpassword/**",
     		"/interviewuser/forgotusername/**", "/interviewuser/image/**", "/interviewuser/setpwd","/interviewuser/setrole" };
     public static final String USER_NOT_FOUND = "User not found";
     //public static final String[] PUBLIC_URLS = { "**" };
