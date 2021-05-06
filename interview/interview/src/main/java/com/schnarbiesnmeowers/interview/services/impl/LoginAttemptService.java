@@ -12,7 +12,7 @@ import com.google.common.cache.LoadingCache;
 
 /**
  * 
- * @author dylan
+ * @author Dylan I. Kessler
  *
  */
 @Service

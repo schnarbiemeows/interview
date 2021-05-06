@@ -62,7 +62,7 @@ import com.schnarbiesnmeowers.interview.utilities.Roles;
 
 /**
  * 
- * @author dylan
+ * @author Dylan I. Kessler
  *
  */
 @Service

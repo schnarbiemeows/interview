@@ -29,7 +29,6 @@ import com.schnarbiesnmeowers.interview.pojos.ResponseMessage;
  * @author Dylan I. Kessler
  *
  */
-//@CrossOrigin
 @RestController
 @RequestMapping(path="/answer")
 public class AnswerController extends AnswerExceptionHandling {
@@ -47,7 +46,6 @@ public class AnswerController extends AnswerExceptionHandling {
 	 * @return Iterable<Answer>
 	 */
 	@GetMapping(path = "/all")
-	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<List<AnswerDTO>> getAllAnswer() throws Exception {
 		List<AnswerDTO> answer = businessService.getAllAnswer();
 		return ResponseEntity.status(HttpStatus.OK).body(answer);

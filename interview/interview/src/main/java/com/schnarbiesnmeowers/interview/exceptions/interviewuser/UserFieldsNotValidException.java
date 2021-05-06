@@ -2,7 +2,7 @@ package com.schnarbiesnmeowers.interview.exceptions.interviewuser;
 
 /**
  * 
- * @author dylan
+ * @author Dylan I. Kessler
  *
  */
 public class UserFieldsNotValidException extends Exception {

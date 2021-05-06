@@ -21,7 +21,7 @@ import com.schnarbiesnmeowers.interview.pojos.InterviewUser;
 
 /**
  * 
- * @author dylan
+ * @author Dylan I. Kessler
  *
  */
 public interface UserService {

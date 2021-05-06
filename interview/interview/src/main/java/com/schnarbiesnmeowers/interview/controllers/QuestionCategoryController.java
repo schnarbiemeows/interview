@@ -47,7 +47,6 @@ public class QuestionCategoryController extends QuestionCategoryExceptionHandlin
 	 * @return Iterable<QuestionCategory>
 	 */
 	@GetMapping(path = "/all")
-	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<List<QuestionCategoryDTO>> getAllQuestionCategory() throws Exception {
 		List<QuestionCategoryDTO> questioncategory = businessService.getAllQuestionCategory();
 		return ResponseEntity.status(HttpStatus.OK).body(questioncategory);

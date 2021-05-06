@@ -33,7 +33,7 @@ import com.sun.mail.smtp.SMTPTransport;
  * sending the user a new password
  * sending the user their username
  * informing the admins when a user locks themselves out of their account
- * @author dylan
+ * @author Dylan I. Kessler
  *
  */
 @Service

@@ -4,7 +4,7 @@ import static com.schnarbiesnmeowers.interview.utilities.Authorizations.*;
 
 /**
  * 
- * @author dylan
+ * @author Dylan I. Kessler
  *
  */
 public enum Roles {

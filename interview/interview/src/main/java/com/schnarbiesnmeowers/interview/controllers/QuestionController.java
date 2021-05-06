@@ -36,7 +36,6 @@ public class QuestionController {
 	 * @return Iterable<Question>
 	 */
 	@GetMapping(path = "/all")
-	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<List<QuestionDTO>> getAllQuestion() throws Exception {
 		List<QuestionDTO> question = businessService.getAllQuestion();
 		return ResponseEntity.status(HttpStatus.OK).body(question);

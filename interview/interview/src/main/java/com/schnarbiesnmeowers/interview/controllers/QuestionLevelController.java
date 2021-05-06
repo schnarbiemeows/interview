@@ -47,7 +47,6 @@ public class QuestionLevelController extends QuestionLevelExceptionHandling {
 	 * @return Iterable<QuestionLevel>
 	 */
 	@GetMapping(path = "/all")
-	@PreAuthorize("hasAnyAuthority('data:select')")
 	public ResponseEntity<List<QuestionLevelDTO>> getAllQuestionLevel() throws Exception {
 		List<QuestionLevelDTO> questionlevel = businessService.getAllQuestionLevel();
 		return ResponseEntity.status(HttpStatus.OK).body(questionlevel);

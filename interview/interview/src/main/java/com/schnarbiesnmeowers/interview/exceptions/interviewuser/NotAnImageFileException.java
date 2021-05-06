@@ -2,7 +2,7 @@ package com.schnarbiesnmeowers.interview.exceptions.interviewuser;
 
 /**
  * 
- * @author dylan
+ * @author Dylan I. Kessler
  *
  */
 public class NotAnImageFileException extends Exception {

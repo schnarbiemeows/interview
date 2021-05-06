@@ -11,7 +11,7 @@ import com.schnarbiesnmeowers.interview.services.impl.LoginAttemptService;
 
 /**
  * 
- * @author dylan
+ * @author Dylan I. Kessler
  *
  */
 @Component

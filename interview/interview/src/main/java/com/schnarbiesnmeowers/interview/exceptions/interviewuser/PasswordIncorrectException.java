@@ -3,7 +3,7 @@ package com.schnarbiesnmeowers.interview.exceptions.interviewuser;
 /**
  * when the user tries to change their password, but their old password is
  * incorrect, this is the exception that gets thrown
- * @author dylan
+ * @author Dylan I. Kessler
  *
  */
 public class PasswordIncorrectException extends Exception {

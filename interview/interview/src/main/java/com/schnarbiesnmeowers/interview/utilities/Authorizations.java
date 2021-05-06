@@ -18,7 +18,7 @@ package com.schnarbiesnmeowers.interview.utilities;
  * user:create - admin can create users(non-admin)
  * user:delete - admin can delete users(non-admin)
  * 
- * @author dylan
+ * @author Dylan I. Kessler
  *
  */
 public class Authorizations {
