@@ -17,7 +17,7 @@ public class Constants {
     public static final String ACCESS_DENIED_MESSAGE = "You do not have permission to access this page";
     public static final String OPTIONS_HTTP_METHOD = "OPTIONS";
     public static final String[] PUBLIC_URLS = { "/recaptcha/post","/answer/all","/questioncategory/all","/questionlevel/all","/question/all","/healthcheck/ping", "/interviewuser/login", "/interviewuser/register", "/interviewuser/forgotpassword/**",
-    		"/interviewuser/forgotusername/**", "/interviewuser/image/**", "/interviewuser/setpwd","/interviewuser/setrole" };
+    		"/interviewuser/forgotusername/**", "/interviewuser/image/**", "/interviewuser/setpwd","/interviewuser/setrole","/interviewuser/testemail" };
     public static final String USER_NOT_FOUND = "User not found";
     //public static final String[] PUBLIC_URLS = { "**" };
 	//public static final String USER_IMAGE_PROFILE_DEFAULT = "/user/image/profile/";
@@ -31,6 +31,7 @@ public class Constants {
     public static final String FROM_EMAIL = "support@schnarbies-n-meowers.com";
     public static final String EMAIL_SUBJECT = "schnarbies-n-meowers.com - New Password";
     public static final String EMAIL_SUBJECT_LOCKED = "Interview - Locked Account";
+    public static final String EMAIL_TESTING = "Interview - testing";
     public static final String GMAIL_SMTP_SERVER = "smtp.gmail.com";
     public static final String SMTP_HOST = "mail.smtp.host";
     public static final String SMTP_AUTH = "mail.smtp.auth";

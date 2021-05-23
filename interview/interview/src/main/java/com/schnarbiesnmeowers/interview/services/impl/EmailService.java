@@ -3,6 +3,7 @@ package com.schnarbiesnmeowers.interview.services.impl;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.DEFAULT_PORT;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.EMAIL_SUBJECT;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.EMAIL_SUBJECT_LOCKED;
+import static com.schnarbiesnmeowers.interview.utilities.Constants.EMAIL_TESTING;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.FROM_EMAIL;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.GMAIL_SMTP_SERVER;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.SIMPLE_MAIL_TRANSFER_PROTOCOL;
@@ -22,6 +23,8 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +42,8 @@ import com.sun.mail.smtp.SMTPTransport;
 @Service
 public class EmailService {
 
+	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
+	
 	@Value("${email.username}")
 	private String username;
 	
@@ -149,4 +154,40 @@ public class EmailService {
 		message.saveChanges();
 		return message;
 	}
+	
+	public void testEmail() {
+		try {
+			Message message = createTestEmail();
+			SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
+			transport.connect(GMAIL_SMTP_SERVER, username, waffle);
+			transport.sendMessage(message, message.getAllRecipients());
+			transport.close();	
+		} catch(AddressException ae) {
+			logAction("AddressException sending test email --> " + ae.getMessage());
+			
+		} catch(MessagingException me) {
+			logAction("MessagingException sending test email  --> " + me.getMessage());
+		} catch(Exception ee) {
+			logAction("General Exception sending test email  --> " + ee.getMessage());
+		}
+	}
+	
+	public Message createTestEmail() throws AddressException, MessagingException {
+		Message message = new MimeMessage(getEmailSession());
+		message.setFrom(new InternetAddress(FROM_EMAIL));
+		message.setRecipients(Message.RecipientType.TO,InternetAddress.parse(cc,false));
+		message.setSubject(EMAIL_TESTING);
+		message.setText("testing this email");
+		message.setSentDate(new Date());
+		message.saveChanges();
+		return message;
+	}
+	/**
+	 * 
+	 * @param message
+	 */
+	private static void logAction(String message) {
+    	System.out.println(message);
+    	applicationLogger.debug(message);
+    }
 }

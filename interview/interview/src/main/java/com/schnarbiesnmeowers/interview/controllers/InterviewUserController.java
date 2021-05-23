@@ -150,6 +150,11 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	        return response(HttpStatus.OK, EMAIL_SENT + email);
 	    }
 	 
+	 @GetMapping("/testemail")
+	    public ResponseEntity<HttpResponse> testEmail() {
+	        userService.testEmail();
+	        return response(HttpStatus.OK, EMAIL_SENT);
+	    }
 	 
 	/*
 	 * @PostMapping(path = "/setrole") public ResponseEntity<InterviewUserDTO>

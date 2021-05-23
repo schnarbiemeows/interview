@@ -188,7 +188,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 * @param password
 	 * @return
 	 */
-	
 	 public void setPassword(String username, String password) {
 		 logAction("New user identifier = " + username + " to --> " + password);
 	 	InterviewUser user = repository.findUserByUserName(username); String
@@ -197,8 +196,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 	repository.save(user); 
 	 }
 	 
-	
-	public void setRole(String username) { 
+	/**
+	 * 
+	 * @param username
+	 */
+	 public void setRole(String username) { 
 		InterviewUser user = repository.findUserByUserName(username);
 		user.setRoles(Roles.ROLE_SUPER.name());
 		user.setAuthorizations(Roles.ROLE_SUPER.getAuthorizations());
@@ -580,6 +582,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     	applicationLogger.debug(message);
     }
 
-	
+	@Override
+	public void testEmail() {
+		this.emailService.testEmail();
+	}
 
 }

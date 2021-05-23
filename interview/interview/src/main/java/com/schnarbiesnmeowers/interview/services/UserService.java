@@ -46,4 +46,5 @@ public interface UserService {
 	void forgotUsername(String email) throws AddressException, MessagingException, EmailNotFoundException;
 	InterviewUser updateProfileImage(String username, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, NotAnImageFileException;
 	public String getTemporaryImageUrl(String username);
+	public void testEmail();
 }
