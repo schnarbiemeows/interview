@@ -174,21 +174,22 @@ public class EmailService {
 	}
 	
 	public void testEmail() {
-		System.out.println("password = " + waffle);
+		logAction("entering testEmail()");
 		try {
 		Message message = createTestEmail();
 		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
 		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
 		transport.sendMessage(message, message.getAllRecipients());
 		transport.close();	
+		logAction("Sent test email to --> " + cc);
 		} catch(AddressException ae) {
 			logAction("AddressException sending test email --> " + ae.getMessage());
-			
 		} catch(MessagingException me) {
 			logAction("MessagingException sending test email  --> " + me.getMessage());
 		} catch(Exception ee) {
 			logAction("General Exception sending test email  --> " + ee.getMessage());
 		}
+		logAction("leaving testEmail()");
 	}
 	
 //	public void testEmail() {
