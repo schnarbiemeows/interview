@@ -20,6 +20,7 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<jacoco-agent.destFile>target/jacoco.exec</jacoco-agent.destFile>
 		<spring-cloud.version>Hoxton.SR3</spring-cloud.version>
+		<amazon-sdk.version>1.11.728</amazon-sdk.version>
 	</properties>
 
 	<dependencies>
@@ -51,6 +52,13 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk -->
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk</artifactId>
+    <version>1.11.1029</version>
+</dependency>
+
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>

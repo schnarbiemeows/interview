@@ -28,7 +28,15 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sun.mail.smtp.SMTPTransport;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
+import com.amazonaws.services.simpleemail.model.CreateCustomVerificationEmailTemplateRequest;
+import com.amazonaws.services.simpleemail.model.CreateCustomVerificationEmailTemplateResult;
+import com.amazonaws.services.simpleemail.model.SendCustomVerificationEmailRequest;
+import com.sun.mail.smtp.SMTPTransport; 
+
+
 
 /**
  * Email service class
@@ -52,6 +60,16 @@ public class EmailService {
 	
 	@Value("${email.cc}")
 	private String cc;
+	
+	static final String FROM = "interviewmailer76@gmail.com";
+	static final String TO = "dylanikessler@yahoo.com";
+	static final String SUBJECT = "Amazon SES test (AWS SDK for Java)";
+	static final String HTMLBODY = "<h1>Amazon SES test (AWS SDK for Java)</h1>"
+		      + "<p>This email was sent with <a href='https://aws.amazon.com/ses/'>"
+		      + "Amazon SES</a> using the <a href='https://aws.amazon.com/sdk-for-java/'>" 
+		      + "AWS SDK for Java</a>";
+	static final String TEXTBODY = "This email was sent through Amazon SES "
+		      + "using the AWS SDK for Java.";
 	
 	/**
 	 * method to send an email to the user with a new password in it
@@ -156,12 +174,13 @@ public class EmailService {
 	}
 	
 	public void testEmail() {
+		System.out.println("password = " + waffle);
 		try {
-			Message message = createTestEmail();
-			SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
-			transport.connect(GMAIL_SMTP_SERVER, username, waffle);
-			transport.sendMessage(message, message.getAllRecipients());
-			transport.close();	
+		Message message = createTestEmail();
+		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
+		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
+		transport.sendMessage(message, message.getAllRecipients());
+		transport.close();	
 		} catch(AddressException ae) {
 			logAction("AddressException sending test email --> " + ae.getMessage());
 			
@@ -171,6 +190,89 @@ public class EmailService {
 			logAction("General Exception sending test email  --> " + ee.getMessage());
 		}
 	}
+	
+//	public void testEmail() {
+//		try {
+//		      AmazonSimpleEmailService client = 
+//		          AmazonSimpleEmailServiceClientBuilder.standard()
+//		          // Replace US_WEST_2 with the AWS Region you're using for
+//		          // Amazon SES.
+//		            .withRegion(Regions.US_EAST_1).build();
+//		      SendEmailRequest request = new SendEmailRequest()
+//		          .withDestination(
+//		              new Destination().withToAddresses(TO))
+//		          .withMessage(new com.amazonaws.services.simpleemail.model.Message()
+//		              .withBody(new Body()
+//		                  .withHtml(new Content()
+//		                      .withCharset("UTF-8").withData(HTMLBODY))
+//		                  .withText(new Content()
+//		                      .withCharset("UTF-8").withData(TEXTBODY)))
+//		              .withSubject(new Content()
+//		                  .withCharset("UTF-8").withData(SUBJECT)))
+//		          .withSource(FROM);
+//		          // Comment or remove the next line if you are not using a
+//		          // configuration set
+//		          //.withConfigurationSetName(CONFIGSET);
+//		      client.sendEmail(request);
+//		      System.out.println("Email sent!");
+//		    } catch (Exception ex) {
+//		      System.out.println("The email was not sent. Error message: " 
+//		          + ex.getMessage());
+//		    }
+//	}
+	
+//	public void testEmail() {
+//		String templateName = "interviewmailer76verifyemailtemplate_1";
+//		String fromEmailAddress = "interviewmailer76@gmail.com";
+//		String templateSubject = "testing our verification email";
+//		String templateContent = "<h1>click below to verify email!</h1>";
+//		String successUrl = "https://d1fd2sjari3xmm.cloudfront.net/success";
+//		String failureUrl = "https://d1fd2sjari3xmm.cloudfront.net/failure";
+//		try {
+//			SendCustomVerificationEmailRequest request = new SendCustomVerificationEmailRequest()
+//					.withEmailAddress(TO)
+//					.withTemplateName(templateName);
+//			AmazonSimpleEmailService client = AmazonSimpleEmailServiceClientBuilder.standard()
+//			          // Replace US_WEST_2 with the AWS Region you're using for
+//			          // Amazon SES.
+//			            .withRegion(Regions.US_EAST_1).build();
+//			client.sendCustomVerificationEmail(request);
+//			System.out.println("Check");
+//		} catch (Exception ex) {
+//			ex.printStackTrace();
+//		      System.out.println("The email was not sent. Error message: " 
+//			          + ex.getMessage());
+//			    }
+//	}
+	
+//	public void testEmail() {
+//		String templateName = "interviewmailer76verifyemailtemplate_1";
+//		String fromEmailAddress = "interviewmailer76@gmail.com";
+//		String templateSubject = "testing our verification email";
+//		String templateContent = "<h1>click below to verify email!</h1>";
+//		String successUrl = "https://d1fd2sjari3xmm.cloudfront.net/success";
+//		String failureUrl = "https://d1fd2sjari3xmm.cloudfront.net/failure";
+//		try {
+//			CreateCustomVerificationEmailTemplateRequest createTemplate = new CreateCustomVerificationEmailTemplateRequest()
+//					.withFromEmailAddress(fromEmailAddress)
+//					.withTemplateName(templateName)
+//					.withTemplateSubject(templateSubject)
+//					.withTemplateContent(templateContent)
+//					.withFailureRedirectionURL(failureUrl)
+//					.withSuccessRedirectionURL(successUrl);
+//			AmazonSimpleEmailService client = 
+//			          AmazonSimpleEmailServiceClientBuilder.standard()
+//			          // Replace US_WEST_2 with the AWS Region you're using for
+//			          // Amazon SES.
+//			            .withRegion(Regions.US_EAST_1).build();
+//			CreateCustomVerificationEmailTemplateResult result = client.createCustomVerificationEmailTemplate(createTemplate);
+//			System.out.println("Check");
+//		} catch (Exception ex) {
+//			ex.printStackTrace();
+//		      System.out.println("The email was not sent. Error message: " 
+//			          + ex.getMessage());
+//			    }
+//	}
 	
 	public Message createTestEmail() throws AddressException, MessagingException {
 		Message message = new MimeMessage(getEmailSession());
