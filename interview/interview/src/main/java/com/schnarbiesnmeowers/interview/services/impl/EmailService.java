@@ -28,12 +28,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
-import com.amazonaws.services.simpleemail.model.CreateCustomVerificationEmailTemplateRequest;
-import com.amazonaws.services.simpleemail.model.CreateCustomVerificationEmailTemplateResult;
-import com.amazonaws.services.simpleemail.model.SendCustomVerificationEmailRequest;
 import com.sun.mail.smtp.SMTPTransport; 
 
 
