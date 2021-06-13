@@ -2,6 +2,7 @@ package com.schnarbiesnmeowers.interview.exceptions.handler;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.GONE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -30,8 +31,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailExistsException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailNotFoundException;
+import com.schnarbiesnmeowers.interview.exceptions.interviewuser.ExpiredLinkException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.NotAnImageFileException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.PasswordIncorrectException;
+import com.schnarbiesnmeowers.interview.exceptions.interviewuser.PasswordResetException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UserFieldsNotValidException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UserNotFoundException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UsernameExistsException;
@@ -65,12 +68,16 @@ public class InterviewUserExceptionHandling implements ErrorController {
         return createHttpResponse(BAD_REQUEST, INCORRECT_CREDENTIALS);
     }
 
-	/*
-	 * @ExceptionHandler(NoHandlerFoundException.class) public
-	 * ResponseEntity<HttpResponse> noHandlerFoundException() { return
-	 * createHttpResponse(BAD_REQUEST, "This page was not found"); }
-	 */
-    
+	@ExceptionHandler(ExpiredLinkException.class) 
+	public ResponseEntity<HttpResponse> expiredLinkException(ExpiredLinkException exception) { 
+		return createHttpResponse(GONE, exception.getMessage()); 
+	}
+	
+	@ExceptionHandler(PasswordResetException.class) 
+	public ResponseEntity<HttpResponse> recordNotFoundException(PasswordResetException exception) { 
+		return createHttpResponse(GONE, exception.getMessage()); 
+	}
+	
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<HttpResponse> accessDeniedException() {
         return createHttpResponse(FORBIDDEN, NOT_ENOUGH_PERMISSION);

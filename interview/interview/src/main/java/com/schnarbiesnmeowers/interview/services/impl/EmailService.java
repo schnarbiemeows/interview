@@ -1,7 +1,6 @@
 package com.schnarbiesnmeowers.interview.services.impl;
 
 import static com.schnarbiesnmeowers.interview.utilities.Constants.DEFAULT_PORT;
-import static com.schnarbiesnmeowers.interview.utilities.Constants.EMAIL_SUBJECT;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.EMAIL_SUBJECT_LOCKED;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.EMAIL_TESTING;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.FROM_EMAIL;
@@ -18,16 +17,28 @@ import java.util.Properties;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.NoSuchProviderException;
+import javax.mail.SendFailedException;
 import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.schnarbiesnmeowers.interview.email.EmailTemplate;
+import com.schnarbiesnmeowers.interview.email.ForgotPasswordEmailTemplate;
+import com.schnarbiesnmeowers.interview.email.ForgotUsernameEmailTemplate;
+import com.schnarbiesnmeowers.interview.email.ManagementEmailTemplate;
+import com.schnarbiesnmeowers.interview.email.NoAddressFoundPREmailTemplate;
+import com.schnarbiesnmeowers.interview.email.NoAddressFoundUREmailTemplate;
+import com.schnarbiesnmeowers.interview.email.VerifyRegistrationEmailTemplate;
 import com.sun.mail.smtp.SMTPTransport; 
 
 
@@ -55,6 +66,12 @@ public class EmailService {
 	@Value("${email.cc}")
 	private String cc;
 	
+	@Value("${success.email.link}")
+	private String successEmailUrl;
+	
+	@Value("${success.email.expiration.minutes}")
+	private int linkExpirationTime;
+	
 	static final String FROM = "interviewmailer76@gmail.com";
 	static final String TO = "dylanikessler@yahoo.com";
 	static final String SUBJECT = "Amazon SES test (AWS SDK for Java)";
@@ -65,23 +82,31 @@ public class EmailService {
 	static final String TEXTBODY = "This email was sent through Amazon SES "
 		      + "using the AWS SDK for Java.";
 	
+	
 	/**
 	 * method to send an email to the user with a new password in it
-	 * @param firstName
+	 * @param username
 	 * @param password
 	 * @param email
 	 * @throws MessagingException 
 	 * @throws AddressException 
 	 */
-	public void sendNewPasswordEmail(String firstName, String password, String email) throws AddressException, MessagingException {
-		String messageToSend = "Hello " + firstName + ", \n \n Your new account password is: " + password + " \n \n The Support Team";
-		Message message = createEmail(firstName,password,email,messageToSend);
-		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
-		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
-		transport.sendMessage(message, message.getAllRecipients());
-		transport.close();		
+	public void sendConfirmEmailEmail(String emailAddress,String uniqueId) throws AddressException, MessagingException {
+		//successEmailUrl = "http://127.0.0.1:4200";
+		String pageLink = successEmailUrl + "/confirmemail";
+		EmailTemplate template = new VerifyRegistrationEmailTemplate(emailAddress,username,pageLink,uniqueId,linkExpirationTime);
+		createAndSendEmail(template);		
 	}
-	
+
+	public void sendForgotPasswordEmail(String emailAddress,String uniqueId) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException {
+		//successEmailUrl = "http://127.0.0.1:4200";
+		String pageLink = successEmailUrl + "/passwordreset";
+		String loginUrl = successEmailUrl + "/login";
+		System.out.println(uniqueId);
+		EmailTemplate template = new ForgotPasswordEmailTemplate(emailAddress,pageLink,loginUrl,uniqueId,linkExpirationTime);
+		createAndSendEmail(template);
+	}
+
 	/**
 	 * method to send an email to the user with their username in it
 	 * @param firstName
@@ -90,29 +115,82 @@ public class EmailService {
 	 * @throws AddressException
 	 * @throws MessagingException
 	 */
-	public void sendEmailWithUsername(String firstName, String username, String email) throws AddressException, MessagingException {
-		String messageToSend = "Hello " + firstName + ", \n \n Your username is: " + username + " \n \n The Support Team";
-		Message message = createEmail(firstName,username,email,messageToSend);
+	public void sendEmailWithUsername(String emailAddress,String username) throws AddressException, MessagingException {
+		//successEmailUrl = "http://127.0.0.1:4200";
+		String loginUrl = successEmailUrl + "/login";
+		EmailTemplate template = new ForgotUsernameEmailTemplate(emailAddress, username, loginUrl);
+		createAndSendEmail(template);	
+	}
+
+	/**
+	 * method to send an email to the user informing them that no account was found for this email
+	 * this is used for both requesting a password reset or a username reminder
+	 * @param emailAddress
+	 * @throws MessagingException 
+	 * @throws SendFailedException 
+	 * @throws NoSuchProviderException 
+	 * @throws AddressException 
+	 */
+	public void sendNoAddressFoundEmail(String emailAddress, boolean reset) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException {
+		EmailTemplate template = null;
+		if(reset) {
+			template = new NoAddressFoundPREmailTemplate(emailAddress);
+		} else {
+			template = new NoAddressFoundUREmailTemplate(emailAddress);
+		}
+		createAndSendEmail(template);
+	}
+
+	/**
+	 * 
+	 * @param subject
+	 * @param body
+	 * @throws AddressException
+	 * @throws NoSuchProviderException
+	 * @throws SendFailedException
+	 * @throws MessagingException
+	 */
+	public void sendManagementEmail(String subject, String body) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException {
+		EmailTemplate template = new ManagementEmailTemplate(subject, body);
+		template.setEmailAddress(cc);
+		createAndSendEmail(template);	
+	}
+
+	private void createAndSendEmail(EmailTemplate template)
+			throws AddressException, MessagingException, NoSuchProviderException, SendFailedException {
+		Message message = createEmail(template);
 		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
 		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
 		transport.sendMessage(message, message.getAllRecipients());
-		transport.close();		
+		transport.close();
 	}
-	
+
 	/**
-	 * method to send an email to the admins when a user locks themselves out of their account
-	 * @param user
+	 * method to create the Message email object
+	 * @param template
+	 * @return
 	 * @throws AddressException
 	 * @throws MessagingException
 	 */
-	public void sendEmailForLockedAccount(String user) throws AddressException, MessagingException {
-		Message message = createLockedAccountEmail(user);
-		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
-		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
-		transport.sendMessage(message, message.getAllRecipients());
-		transport.close();		
+	private Message createEmail(EmailTemplate template) throws AddressException, MessagingException {
+		Message message = new MimeMessage(getEmailSession());
+		message.setFrom(new InternetAddress(FROM_EMAIL));
+		message.setRecipients(Message.RecipientType.TO,InternetAddress.parse(template.getEmailAddress()));
+		/** 
+		 * TODO - remove
+		 */
+		message.setRecipients(Message.RecipientType.CC,InternetAddress.parse(cc,false));
+		message.setSubject(template.getSubject());
+		Multipart multipart = new MimeMultipart();
+		MimeBodyPart messageBodyPart = new MimeBodyPart();       
+		messageBodyPart.setContent(template.getBody(), "text/html");
+		multipart.addBodyPart(messageBodyPart);
+	    message.setContent(multipart,"text/html");
+		message.setSentDate(new Date());
+		message.saveChanges();
+		return message;
 	}
-	
+
 	/**
 	 * method to get the email section
 	 * @return
@@ -127,54 +205,21 @@ public class EmailService {
 		return Session.getInstance(properties,null);
 	}
 	
-	/**
-	 * method to create the Message email object
-	 * @param firstName
-	 * @param password
-	 * @param email
-	 * @param messageToSend
-	 * @return
-	 * @throws AddressException
-	 * @throws MessagingException
-	 */
-	private Message createEmail(String firstName, String password, String email,String messageToSend) throws AddressException, MessagingException {
-		Message message = new MimeMessage(getEmailSession());
-		message.setFrom(new InternetAddress(FROM_EMAIL));
-		message.setRecipients(Message.RecipientType.TO,InternetAddress.parse(email,false));
-		message.setRecipients(Message.RecipientType.CC,InternetAddress.parse(cc,false));
-		message.setSubject(EMAIL_SUBJECT);
-		message.setText(messageToSend);
-		message.setSentDate(new Date());
-		message.saveChanges();
-		return message;
-	}
-	
-	/**
-	 * method to create the Message email object for a "Locked account" email
-	 * @param username
-	 * @return
-	 * @throws AddressException
-	 * @throws MessagingException
-	 */
-	private Message createLockedAccountEmail(String username) throws AddressException, MessagingException {
-		Message message = new MimeMessage(getEmailSession());
-		message.setFrom(new InternetAddress(FROM_EMAIL));
-		message.setRecipients(Message.RecipientType.TO,InternetAddress.parse(cc,false));
-		message.setSubject(EMAIL_SUBJECT_LOCKED);
-		message.setText("User --> " + username + " <-- has been locked out of their account");
-		message.setSentDate(new Date());
-		message.saveChanges();
-		return message;
-	}
-	
 	public void testEmail() {
 		logAction("entering testEmail()");
+		String emailAddress = "dylanikessler@yahoo.com";
 		try {
-		Message message = createTestEmail();
-		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
-		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
-		transport.sendMessage(message, message.getAllRecipients());
-		transport.close();	
+			sendConfirmEmailEmail(emailAddress,"XXX");
+			sendForgotPasswordEmail(emailAddress,"XXX");
+			sendEmailWithUsername(emailAddress,"XXX");
+			sendNoAddressFoundEmail(emailAddress,true);
+			sendNoAddressFoundEmail(emailAddress,false);
+			sendManagementEmail("SUBJECT","BODY");
+//		Message message = createTestEmail();
+//		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
+//		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
+//		transport.sendMessage(message, message.getAllRecipients());
+//		transport.close();	
 		logAction("Sent test email to --> " + cc);
 		} catch(AddressException ae) {
 			logAction("AddressException sending test email --> " + ae.getMessage());
@@ -269,16 +314,6 @@ public class EmailService {
 //			    }
 //	}
 	
-	public Message createTestEmail() throws AddressException, MessagingException {
-		Message message = new MimeMessage(getEmailSession());
-		message.setFrom(new InternetAddress(FROM_EMAIL));
-		message.setRecipients(Message.RecipientType.TO,InternetAddress.parse(cc,false));
-		message.setSubject(EMAIL_TESTING);
-		message.setText("testing this email");
-		message.setSentDate(new Date());
-		message.saveChanges();
-		return message;
-	}
 	/**
 	 * 
 	 * @param message

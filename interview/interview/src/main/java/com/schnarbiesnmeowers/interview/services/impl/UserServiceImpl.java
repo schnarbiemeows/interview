@@ -3,17 +3,17 @@ package com.schnarbiesnmeowers.interview.services.impl;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.A_USER_WITH_THIS_EMAIL_ALREADY_EXISTS;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.DIRECTORY_CREATED;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.DOT;
+import static com.schnarbiesnmeowers.interview.utilities.Constants.EXPIRED_LINK;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.FILE_SAVED_IN_FILE_SYSTEM;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.FORWARD_SLASH;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.JPG_EXTENSION;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.NOT_AN_IMAGE_FILE;
-import static com.schnarbiesnmeowers.interview.utilities.Constants.NO_USER_FOUND_BY_EMAIL;
+import static com.schnarbiesnmeowers.interview.utilities.Constants.NO_USER_FOUND_BY_ID;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.NO_USER_FOUND_BY_USERNAME;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.USERNAME_ALREADY_EXISTS;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.USER_FOLDER;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.USER_IMAGE_PATH;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.USER_NOT_FOUND;
-import static com.schnarbiesnmeowers.interview.utilities.Constants.INCORRECT_OLD_PASSWORD;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.springframework.http.MediaType.IMAGE_GIF_VALUE;
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
@@ -29,6 +29,8 @@ import java.util.Date;
 import java.util.List;
 
 import javax.mail.MessagingException;
+import javax.mail.NoSuchProviderException;
+import javax.mail.SendFailedException;
 import javax.mail.internet.AddressException;
 import javax.transaction.Transactional;
 
@@ -39,6 +41,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -47,16 +50,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.schnarbiesnmeowers.interview.dtos.CheckPasswordResetResponseDTO;
+import com.schnarbiesnmeowers.interview.dtos.InterviewUserDTO;
 import com.schnarbiesnmeowers.interview.dtos.InterviewUserDTOWrapper;
+import com.schnarbiesnmeowers.interview.dtos.PasswordResetDTO;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailExistsException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailNotFoundException;
+import com.schnarbiesnmeowers.interview.exceptions.interviewuser.ExpiredLinkException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.NotAnImageFileException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.PasswordIncorrectException;
+import com.schnarbiesnmeowers.interview.exceptions.interviewuser.PasswordResetException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UserNotFoundException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UsernameExistsException;
 import com.schnarbiesnmeowers.interview.pojos.InterviewUser;
+import com.schnarbiesnmeowers.interview.pojos.InterviewUserTemp;
+import com.schnarbiesnmeowers.interview.pojos.PasswordReset;
 import com.schnarbiesnmeowers.interview.security.UserPrincipal;
 import com.schnarbiesnmeowers.interview.services.InterviewUserRepository;
+import com.schnarbiesnmeowers.interview.services.InterviewUserTempRepository;
+import com.schnarbiesnmeowers.interview.services.PasswordResetRepository;
 import com.schnarbiesnmeowers.interview.services.UserService;
 import com.schnarbiesnmeowers.interview.utilities.Roles;
 
@@ -73,23 +85,36 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
 	
 	private InterviewUserRepository repository;
+	private InterviewUserTempRepository tempRepository;
 	private BCryptPasswordEncoder passwordEncoder;
 	private LoginAttemptService loginAttemptService;
+	private PasswordResetRepository passwordResetRepository;
 	private EmailService emailService;
 	
+	@Value("${success.email.expiration.minutes}")
+	private int linkExpirationTime;
+	
 	/**
-	 * constructor using 
+	 * constructor using constructor injection
 	 * @param repository
+	 * @param tempRepository
 	 * @param passwordEncoder
 	 * @param loginAttemptService
 	 * @param emailService
 	 */
 	@Autowired
-	public UserServiceImpl(InterviewUserRepository repository,BCryptPasswordEncoder passwordEncoder, LoginAttemptService loginAttemptService,EmailService emailService ) {
+	public UserServiceImpl(InterviewUserRepository repository,
+			InterviewUserTempRepository tempRepository,
+			BCryptPasswordEncoder passwordEncoder, 
+			LoginAttemptService loginAttemptService,
+			PasswordResetRepository passwordResetRepository,
+			EmailService emailService ) {
 		super();
 		this.repository = repository;
+		this.tempRepository = tempRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.loginAttemptService = loginAttemptService;
+		this.passwordResetRepository = passwordResetRepository;
 		this.emailService = emailService;
 	}
 
@@ -125,7 +150,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
 
 	/**
-	 * 
+	 * this method will validate the login attempt and send management an email if the account gets locked
 	 * @param user
 	 * @throws MessagingException 
 	 * @throws AddressException 
@@ -134,7 +159,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		if(user.isUserNotLocked()) {
 			if(this.loginAttemptService.hasExceededMaxAttempts(user.getUserName())) {
 				user.setUserNotLocked(false);
-				this.emailService.sendEmailForLockedAccount(user.getUserName());
+				this.emailService.sendManagementEmail("Interview Program - Locked Account","the account for username = " + user.getUserName() + " was locked");
 			} else {
 				user.setUserNotLocked(true);
 			}
@@ -144,7 +169,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	}
 
 	/**
-	 * 
+	 * this is the registration main method
+	 * it will put a record into the interview_user_temp table instead of the normal interview_user table
+	 * the user needs to confirm their email in order for this record to get transferred over to the normal table.
 	 * @param firstName
 	 * @param lastName
 	 * @param username
@@ -157,31 +184,99 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 * @throws MessagingException
 	 */
 	@Override
-	public InterviewUser register(String firstName, String lastName, String username, String email) throws UserNotFoundException, UsernameExistsException, EmailExistsException, AddressException, MessagingException {
+	public InterviewUser register(String firstName, String lastName, String username, String email, String password) throws UserNotFoundException, UsernameExistsException, EmailExistsException, AddressException, MessagingException {
 		validateNewUsernameAndEmail(StringUtils.EMPTY,username,email);
 		InterviewUser user = new InterviewUser();
+		InterviewUserTemp tempUser = new InterviewUserTemp();
+		String uniqueId = generateUniqueId();
 		String userIdentifier = generateUserIdentifier();
-		user.setUserIdentifier(userIdentifier);
-		String password = generatePassword();
 		String encodedPassword = encodePassword(password);
+		
+		tempUser.setUniqueId(uniqueId);
+		tempUser.setUserIdentifier(userIdentifier);
+		tempUser.setFirstName(firstName);
+		tempUser.setLastName(lastName);
+		tempUser.setUserName(username);
+		tempUser.setEmailAddr(email);
+		tempUser.setJoinDate(new Date());
+		tempUser.setCreatedDate(new Date());
+		tempUser.setPassword(encodedPassword);
+		tempUser.setUserActive(true);
+		tempUser.setUserNotLocked(true);
+		tempUser.setRoles(Roles.ROLE_BASIC_USER.name());
+		tempUser.setAuthorizations(Roles.ROLE_BASIC_USER.getAuthorizations());
+		tempUser.setProfileImage(getTemporaryImageUrl(username));
+		
+		user.setUserIdentifier(userIdentifier);
 		user.setFirstName(firstName);
 		user.setLastName(lastName);
 		user.setUserName(username);
 		user.setEmailAddr(email);
 		user.setJoinDate(new Date());
-		user.setPassword(encodedPassword);
 		user.setUserActive(true);
 		user.setUserNotLocked(true);
 		user.setRoles(Roles.ROLE_BASIC_USER.name());
 		user.setAuthorizations(Roles.ROLE_BASIC_USER.getAuthorizations());
 		user.setProfileImage(getTemporaryImageUrl(username));
-		repository.save(user);
+		tempRepository.save(tempUser);
 		logAction("New user identifier = " + userIdentifier);
-		logAction("New user password = " + password);
-		this.emailService.sendNewPasswordEmail(firstName, password, email);
+		this.emailService.sendConfirmEmailEmail(email,uniqueId);
 		return user;
 	}
 	
+	/**
+	 * this method gets called when the user confirms their email address, and will copy over the
+	 * user's interview_user_temp record into the interview_user table, and then delte that record.
+	 * @param id
+	 * @return
+	 * @throws ExpiredLinkException 
+	 * @throws UserNotFoundException 
+	 */
+	@Override
+	public InterviewUser confirmEmail(String id) throws ExpiredLinkException, UserNotFoundException {
+		InterviewUserTemp tempUser = tempRepository.findUserByUniqueId(id);
+		if(tempUser == null) {
+    		throw new UserNotFoundException(NO_USER_FOUND_BY_ID);
+    	}
+		if(isTheRecordExpired(tempUser.getCreatedDate())) {
+			tempRepository.delete(tempUser);
+			throw new ExpiredLinkException(EXPIRED_LINK);
+		}
+		InterviewUser newUser = copyOverFromTempRecord(tempUser);
+		repository.save(newUser);
+		tempRepository.delete(tempUser);
+		return newUser;
+	}
+	
+	/**
+	 * method to determine if the temp record is expired
+	 * the default time = 5 minutes
+	 * @param tempUser
+	 * @return
+	 */
+	private boolean isTheRecordExpired(Date recordDate) {
+		Date today = new Date();
+		long difference = today.getTime() - recordDate.getTime();
+		System.out.println("difference = " + difference);
+		if(difference > linkExpirationTime*60000) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * this method will copy over the values from the temporary record into a permanent InterviewUser record
+	 * @param tempUser
+	 * @return
+	 */
+	private InterviewUser copyOverFromTempRecord(InterviewUserTemp tempUser) {
+		InterviewUser newUser = new InterviewUser(null,tempUser.getAuthorizations(),tempUser.getEmailAddr(),
+		tempUser.getFirstName(),tempUser.isUserActive(),tempUser.isUserNotLocked(),
+		tempUser.getJoinDate(),tempUser.getLastLoginDate(),tempUser.getLastLoginDateDisplay(),
+		tempUser.getLastName(),tempUser.getPassword(),tempUser.getProfileImage(),
+		tempUser.getRoles(),tempUser.getUserIdentifier(),tempUser.getUserName());
+		return newUser;
+	}
 	/**
 	 * TEMPORARY method to manually set passwords to what I want them to be - for testing only
 	 * @param username
@@ -197,7 +292,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 }
 	 
 	/**
-	 * 
+	 * this method set's the role and authorizations on the interview_user record
 	 * @param username
 	 */
 	 public void setRole(String username) { 
@@ -232,8 +327,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 * this method generates a random password for a new user
 	 * @return
 	 */
-	private String generatePassword() {
-		return RandomStringUtils.randomAlphanumeric(10);
+	private String generateUniqueId() {
+		return RandomStringUtils.randomAlphanumeric(255);
 	}
 
 	/**
@@ -338,7 +433,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	}
 
 	/**
-	 * 
+	 * find the user in the interview_user table using the username field
 	 * @param username
 	 * @return
 	 */
@@ -348,7 +443,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	}
 
 	/**
-	 * 
+	 * find the user in the interview_user table using the emailAddr field
 	 * @param email
 	 * @return
 	 */
@@ -366,7 +461,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		return repository.findUserByUserIdentifier(userIdentifier);
 	}
 	/**
-	 * 
+	 * this is an Admin method to add a new user to the interview_user table.
+	 * This method is only to be used by administrators
 	 * @param firstName
 	 * @param lastName
 	 * @param username
@@ -389,7 +485,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		InterviewUser user = new InterviewUser();
 		String userIdentifier = generateUserIdentifier();
 		user.setUserIdentifier(userIdentifier);
-		String password = generatePassword();
+		String password = generateUniqueId();
 		String encodedPassword = encodePassword(password);
 		user.setFirstName(firstName);
 		user.setLastName(lastName);
@@ -408,7 +504,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	}
 
 	/**
-	 * 
+	 * this is an Admin method to update an interview_user record.
+	 * This method is only to be used by administrators
 	 * @param currentUserName
 	 * @param firstName
 	 * @param lastName
@@ -464,7 +561,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	}
 
 	/**
-	 * 
+	 * this is an Admin method to delete an interview_user record.
+	 * This method is only to be used by administrators
 	 * @param username
 	 * @throws IOException
 	 */
@@ -477,22 +575,37 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
 	/**
-	 * this method will change a user's password, and send them an email with the new password in it
+	 * this method will initiate a user's password reset, and send them an email with a link for them to click to
+	 * reset their password
+	 * if no account with that email is found, a different email will be sent to the address informing them of this
+	 * 
 	 * @param email
 	 * @throws AddressException
 	 * @throws MessagingException
 	 * @throws EmailNotFoundException
 	 */
 	@Override
-	public void resetPassword(String email) throws AddressException, MessagingException, EmailNotFoundException {
+	public void resetPasswordInitiation(String email) throws AddressException, MessagingException, EmailNotFoundException {
+		// first check to see if there is a record in interview_user for that email
 		InterviewUser user = this.findUserByEmail(email);
 		if(user == null) {
-			throw new EmailNotFoundException(NO_USER_FOUND_BY_EMAIL + email);
+			// if not, send the NoAddressFoundPREmailTemplate email
+			this.emailService.sendNoAddressFoundEmail(email, true);
 		}
-		String password = generatePassword();
-		user.setPassword(this.encodePassword(password));
-		this.repository.save(user);
-		this.emailService.sendNewPasswordEmail(user.getFirstName(),password , email);	
+		else {
+			// check to see if there is already a record in password_reset
+			String uniqueId = generateUniqueId();
+			Date today = new Date();
+			PasswordReset passwordResetRecord = this.passwordResetRepository.findUserByEmailAddr(email);
+			if(passwordResetRecord == null) {
+				passwordResetRecord = new PasswordReset(null,uniqueId,email,today);
+			} else {
+				passwordResetRecord.setUniqueId(uniqueId);
+				passwordResetRecord.setCreatedDate(today);
+			}
+			this.passwordResetRepository.save(passwordResetRecord);
+			this.emailService.sendForgotPasswordEmail(email,uniqueId);
+		}
 	}
 
 	/**
@@ -506,10 +619,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	public void forgotUsername(String email) throws AddressException, MessagingException, EmailNotFoundException {
 		InterviewUser user = this.findUserByEmail(email);
 		if(user == null) {
-			throw new EmailNotFoundException(NO_USER_FOUND_BY_EMAIL + email);
-		}
-		this.emailService.sendEmailWithUsername(user.getFirstName(),user.getUserName() , email);		
+			// if not, send the NoAddressFoundPREmailTemplate email
+			this.emailService.sendNoAddressFoundEmail(email, false);
+		} else {
+			this.emailService.sendEmailWithUsername(email,user.getUserName());
+		}	
 	}
+	
 	
 	/**
 	 * method to update a user's profile image
@@ -555,7 +671,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	}
 
 	/**
-	 * 
+	 * method to set the user's profileImage URL
 	 * @param username
 	 * @return
 	 */
@@ -565,7 +681,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 	
 	/**
-	 * 
+	 * this method gets the value of the Role using the key
 	 * @param role
 	 * @return
 	 */
@@ -574,7 +690,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	}
 	
 	/**
-	 * 
+	 * logger method
 	 * @param message
 	 */
 	private static void logAction(String message) {
@@ -582,9 +698,91 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     	applicationLogger.debug(message);
     }
 
+	/**
+	 * test method for testing the email functionality
+	 * TODO - remove
+	 */
 	@Override
 	public void testEmail() {
 		this.emailService.testEmail();
+	}
+
+	/**
+	 * this method checks the password_reset table first to see if there actually is a password reset request record
+	 * associated with the given unique Id
+	 * @param id
+	 * @return
+	 * @throws MessagingException 
+	 * @throws SendFailedException 
+	 * @throws NoSuchProviderException 
+	 * @throws AddressException 
+	 */
+	@Override
+	public CheckPasswordResetResponseDTO checkPasswordResetTable(String id) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException {
+		CheckPasswordResetResponseDTO  results = null;
+		PasswordReset resetRecord = passwordResetRepository.findUserByUniqueId(id);
+		if(resetRecord == null) {
+			this.emailService.sendManagementEmail("Interview Program: checkPasswordResetTable issue", "A check on the password_reset table for the unique id = " + id + " has failed!");
+			results = new CheckPasswordResetResponseDTO(false,null,null);
+		} else {
+			String emailAdddress = resetRecord.getEmailAddr();
+			// check to see if the timestamp has expired
+			boolean expiredRecord = isTheRecordExpired(resetRecord.getCreatedDate());
+			if(expiredRecord) {
+				passwordResetRepository.delete(resetRecord);
+				results = new CheckPasswordResetResponseDTO(false,emailAdddress,null);
+			} else {
+				// if a valid record is found, change the unique ID, and send back (true,emailAddress,newUniqueId)
+				String newUniqueId = generateUserIdentifier();
+				resetRecord.setUniqueId(newUniqueId);
+				passwordResetRepository.save(resetRecord);
+				results = new CheckPasswordResetResponseDTO(true,emailAdddress,newUniqueId);
+			}
+		}
+		return results;
+	}
+
+	/**
+	 * this method is for the scenario where a customer had a rest password email sent to them, but then decided to try
+	 * to login anyways, and was successful.
+	 * This would lead to a hanging password_reset record, so we need to find it and delete it.
+	 * @param loggedInUser
+	 */
+	@Override
+	public void checkPasswordResetTable(InterviewUserDTO loggedInUser) {
+		PasswordReset resetRecord = passwordResetRepository.findUserByEmailAddr(loggedInUser.getEmailAddr());
+		if(null!=resetRecord) {
+			passwordResetRepository.delete(resetRecord);
+		}
+	}
+
+	/**
+	 * method to actually change the user's password
+	 * @param input
+	 * @return
+	 * @throws AddressException
+	 * @throws NoSuchProviderException
+	 * @throws SendFailedException
+	 * @throws MessagingException
+	 * @throws PasswordResetException
+	 */
+	@Override
+	public InterviewUserDTO changePassword(PasswordResetDTO input) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException, PasswordResetException {
+		PasswordReset resetRecord = passwordResetRepository.findUserByUniqueId(input.getUniqueId());
+		if(resetRecord == null) {
+			this.emailService.sendManagementEmail("Interview Program: checkPasswordResetTable issue", "A final check on the password_reset table for the unique id = " + input.getUniqueId() + " has failed, the record was not found!");
+			throw new PasswordResetException("We're sorry, but there was an issue with your request");
+		}
+		if(!resetRecord.getEmailAddr().equals(input.getEmailAddress())) {
+			this.emailService.sendManagementEmail("Interview Program: checkPasswordResetTable issue", "A final check on the password_reset table for the unique id = " + input.getUniqueId() + " has failed, the email addresses did not match!");
+			throw new PasswordResetException("We're sorry, but there was an issue with your request");
+		}
+		InterviewUser user = repository.findUserByEmailAddr(input.getEmailAddress());
+		String encodedPassword = encodePassword(input.getPassword());
+		user.setPassword(encodedPassword);
+		repository.save(user);
+		passwordResetRepository.delete(resetRecord);
+		return user.toDTO();
 	}
 
 }

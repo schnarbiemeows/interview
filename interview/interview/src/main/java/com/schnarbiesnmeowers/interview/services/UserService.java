@@ -4,15 +4,22 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.mail.MessagingException;
+import javax.mail.NoSuchProviderException;
+import javax.mail.SendFailedException;
 import javax.mail.internet.AddressException;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.schnarbiesnmeowers.interview.dtos.CheckPasswordResetResponseDTO;
+import com.schnarbiesnmeowers.interview.dtos.InterviewUserDTO;
 import com.schnarbiesnmeowers.interview.dtos.InterviewUserDTOWrapper;
+import com.schnarbiesnmeowers.interview.dtos.PasswordResetDTO;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailExistsException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailNotFoundException;
+import com.schnarbiesnmeowers.interview.exceptions.interviewuser.ExpiredLinkException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.NotAnImageFileException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.PasswordIncorrectException;
+import com.schnarbiesnmeowers.interview.exceptions.interviewuser.PasswordResetException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UserNotFoundException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UsernameExistsException;
 import com.schnarbiesnmeowers.interview.pojos.InterviewUser;
@@ -26,7 +33,7 @@ import com.schnarbiesnmeowers.interview.pojos.InterviewUser;
  */
 public interface UserService {
 
-	InterviewUser register(String firstName, String lastName, String username, String email) throws UserNotFoundException, UsernameExistsException, EmailExistsException, AddressException, MessagingException;
+	InterviewUser register(String firstName, String lastName, String username, String email, String password) throws UserNotFoundException, UsernameExistsException, EmailExistsException, AddressException, MessagingException;
 	public void setPassword(String username, String password);
 	public void setRole(String username);
 	List<InterviewUser> getAllUsers();
@@ -42,9 +49,13 @@ public interface UserService {
 	//InterviewUser updateUser(String currentUserName, String firstName, String lastName, String username, String email, String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, NotAnImageFileException;
 	InterviewUser updateUserByUser(InterviewUserDTOWrapper user) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, PasswordIncorrectException;
 	void deleteUser(String username) throws IOException;
-	void resetPassword(String email) throws AddressException, MessagingException, EmailNotFoundException;
+	void resetPasswordInitiation(String email) throws AddressException, MessagingException, EmailNotFoundException;
 	void forgotUsername(String email) throws AddressException, MessagingException, EmailNotFoundException;
 	InterviewUser updateProfileImage(String username, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, NotAnImageFileException;
 	public String getTemporaryImageUrl(String username);
 	public void testEmail();
+	InterviewUser confirmEmail(String id) throws ExpiredLinkException, UserNotFoundException;
+	CheckPasswordResetResponseDTO checkPasswordResetTable(String id) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException;
+	InterviewUserDTO changePassword(PasswordResetDTO input) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException, PasswordResetException;
+	void checkPasswordResetTable(InterviewUserDTO loggedInUser);
 }

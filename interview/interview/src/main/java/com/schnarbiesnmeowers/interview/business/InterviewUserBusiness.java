@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -13,9 +15,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
-import com.schnarbiesnmeowers.interview.utilities.Roles;
+
 import com.schnarbiesnmeowers.interview.dtos.InterviewUserDTO;
 import com.schnarbiesnmeowers.interview.dtos.InterviewUserDTOWrapper;
+import com.schnarbiesnmeowers.interview.dtos.InterviewUserTempDTO;
 import com.schnarbiesnmeowers.interview.exceptions.ResourceNotFoundException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailExistsException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UserFieldsNotValidException;
@@ -24,6 +27,7 @@ import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UsernameExistsE
 import com.schnarbiesnmeowers.interview.pojos.InterviewUser;
 import com.schnarbiesnmeowers.interview.services.InterviewUserRepository;
 import com.schnarbiesnmeowers.interview.services.UserService;
+import com.schnarbiesnmeowers.interview.utilities.Roles;
 /**
  * this class retrieves data from the controller class
  * most business logic should be put in this class
@@ -36,6 +40,7 @@ public class InterviewUserBusiness {
 	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
     public static final String ID_EQUALS = "id = ";
     public static final String NOT_FOUND = " not found";
+    public static final String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}";
 	/**
 	 * JPA Repository handle
 	 */
@@ -248,7 +253,7 @@ public class InterviewUserBusiness {
 	 * @param user
 	 * @throws UserFieldsNotValidException
 	 */
-	public void validateFields(InterviewUserDTO user) throws UserFieldsNotValidException {
+	public void validateFields(InterviewUserTempDTO user) throws UserFieldsNotValidException {
 		if(user.getUserName()==null||user.getUserName().isEmpty()) {
 			throw new UserFieldsNotValidException("username must have a value");
 		}
@@ -260,6 +265,11 @@ public class InterviewUserBusiness {
 		}
 		if(user.getLastName()==null||user.getLastName().isEmpty()) {
 			throw new UserFieldsNotValidException("last name must have a value");
+		}
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(user.getEmailAddr());
+		if(!matcher.matches()) {
+			throw new UserFieldsNotValidException("this email address is not valid");
 		}
 	}
 

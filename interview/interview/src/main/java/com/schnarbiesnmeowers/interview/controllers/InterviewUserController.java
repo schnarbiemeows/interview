@@ -6,6 +6,8 @@ import static com.schnarbiesnmeowers.interview.utilities.Constants.JWT_TOKEN_HEA
 import java.util.List;
 
 import javax.mail.MessagingException;
+import javax.mail.NoSuchProviderException;
+import javax.mail.SendFailedException;
 import javax.mail.internet.AddressException;
 import javax.validation.Valid;
 
@@ -18,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,13 +30,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.schnarbiesnmeowers.interview.business.InterviewUserBusiness;
+import com.schnarbiesnmeowers.interview.dtos.CheckPasswordResetResponseDTO;
 import com.schnarbiesnmeowers.interview.dtos.InterviewUserDTO;
 import com.schnarbiesnmeowers.interview.dtos.InterviewUserDTOWrapper;
+import com.schnarbiesnmeowers.interview.dtos.InterviewUserTempDTO;
+import com.schnarbiesnmeowers.interview.dtos.PasswordResetDTO;
 import com.schnarbiesnmeowers.interview.exceptions.handler.HttpResponse;
 import com.schnarbiesnmeowers.interview.exceptions.handler.InterviewUserExceptionHandling;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailExistsException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.EmailNotFoundException;
+import com.schnarbiesnmeowers.interview.exceptions.interviewuser.ExpiredLinkException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.PasswordIncorrectException;
+import com.schnarbiesnmeowers.interview.exceptions.interviewuser.PasswordResetException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UserFieldsNotValidException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UserNotFoundException;
 import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UsernameExistsException;
@@ -48,24 +54,24 @@ import com.schnarbiesnmeowers.interview.utilities.Constants;
 
 /**
  * this class is the main REST controller
+ * 
  * @author Dylan I. Kessler
  *
  */
 //@CrossOrigin
 @RestController
-@RequestMapping(path="/interviewuser")
+@RequestMapping(path = "/interviewuser")
 public class InterviewUserController extends InterviewUserExceptionHandling {
 
 	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
 	public static final String EMAIL_SENT = "An email with a new password was sent to: ";
-    public static final String USER_DELETED_SUCCESSFULLY = "User deleted successfully";
-	
-	
+	public static final String USER_DELETED_SUCCESSFULLY = "User deleted successfully";
+
 	private InterviewUserBusiness businessService;;
 	private UserService userService;
 	private AuthenticationManager authManager;
 	private JwtTokenProvider jwtTokenProvider;
-	
+
 	@Autowired
 	public InterviewUserController(InterviewUserBusiness businessService, UserService userService,
 			AuthenticationManager authManager, JwtTokenProvider jwtTokenProvider) {
@@ -77,12 +83,14 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	}
 
 	/**
-	 * TODO - there are a number of things wrong with this method:
-	 * 1 - makes no check to see if the fields are null or blank; will put record in DB
-	 * 2 - makes no email validation; will put record with invalid email in the DB, then fails when sending the email
+	 * TODO - there are a number of things wrong with this method: 1 - makes no
+	 * check to see if the fields are null or blank; will put record in DB 2 - makes
+	 * no email validation; will put record with invalid email in the DB, then fails
+	 * when sending the email
 	 */
 	/**
 	 * this method allows the user to register an account
+	 * 
 	 * @param user
 	 * @return ResponseEntity<InterviewUserDTO>
 	 * @throws UserNotFoundException
@@ -90,72 +98,25 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	 * @throws EmailExistsException
 	 * @throws AddressException
 	 * @throws MessagingException
-	 * @throws UserFieldsNotValidException 
-	 */
-	@PostMapping(path = "/register")
-	public ResponseEntity<InterviewUserDTO> register(@RequestBody InterviewUserDTO user) throws UserNotFoundException, UsernameExistsException,
-			EmailExistsException, AddressException, MessagingException, UserFieldsNotValidException {
-		businessService.validateFields(user);
-		InterviewUser newUser = userService.register(user.getFirstName(), user.getLastName(), user.getUserName(),
-				user.getEmailAddr());
-		return new ResponseEntity<>(newUser.toDTO(), HttpStatus.OK);
-	}
-	
-	/**
-	 * 
-	 * @param user
-	 * @return
-	 * @throws UserNotFoundException
-	 * @throws UsernameExistsException
-	 * @throws EmailExistsException
-	 * @throws AddressException
-	 * @throws MessagingException
 	 * @throws UserFieldsNotValidException
 	 */
-	 @PostMapping(path = "/setpwd") public ResponseEntity<InterviewUserDTO> setPassword(@RequestBody InterviewUserDTO user) throws UserNotFoundException,
-	 UsernameExistsException, EmailExistsException, AddressException,MessagingException, UserFieldsNotValidException {
-		 userService.setPassword(user.getUserName(), user.getPassword()); 
-		 return new ResponseEntity<>(user, HttpStatus.OK); 
-	 }
-	 
-	 @PostMapping(path = "/setrole") public ResponseEntity<InterviewUserDTO> setRole(@RequestBody InterviewUserDTO user) throws UserNotFoundException,
-	 UsernameExistsException, EmailExistsException, AddressException,MessagingException, UserFieldsNotValidException {
-		 userService.setRole(user.getUserName()); 
-		 return new ResponseEntity<>(user, HttpStatus.OK); 
-	 }
-	 
-	 /**
-	  * this method is for people who have forgotten their password; it will send them an email with a new password in it
-	  * @param email
-	  * @return
-	  * @throws MessagingException
-	  * @throws EmailNotFoundException
-	  */
-	 @GetMapping("/forgotpassword/{email}")
-	    public ResponseEntity<HttpResponse> forgotPassword(@PathVariable("email") String email) throws MessagingException, EmailNotFoundException {
-	        userService.resetPassword(email);
-	        return response(HttpStatus.OK, EMAIL_SENT + email);
-	    }
-	 
-	 /**
-	  * this method is for people who have forgotten their username; it will send them an email with their username in it
-	  * @param email
-	  * @return
-	  * @throws MessagingException
-	  * @throws EmailNotFoundException
-	  */
-	 @GetMapping("/forgotusername/{email}")
-	    public ResponseEntity<HttpResponse> forgotUsername(@PathVariable("email") String email) throws MessagingException, EmailNotFoundException {
-	        userService.forgotUsername(email);
-	        return response(HttpStatus.OK, EMAIL_SENT + email);
-	    }
-	 
-	 @GetMapping("/testemail")
-	    public ResponseEntity<HttpResponse> testEmail() {
-	        userService.testEmail();
-	        return response(HttpStatus.OK, EMAIL_SENT);
-	    }
-	 
+	@PostMapping(path = "/register")
+	public ResponseEntity<InterviewUserDTO> register(@RequestBody InterviewUserTempDTO user)
+			throws UserNotFoundException, UsernameExistsException, EmailExistsException, AddressException,
+			MessagingException, UserFieldsNotValidException {
+		businessService.validateFields(user);
+		InterviewUser newUser = userService.register(user.getFirstName(), user.getLastName(), user.getUserName(),
+				user.getEmailAddr(), user.getPassword());
+		return new ResponseEntity<>(newUser.toDTO(), HttpStatus.OK);
+	}
+
+	@PostMapping(path = "/confirmemail")
+	public ResponseEntity<InterviewUserDTO> confirmEmail(@RequestBody String id)
+			throws ExpiredLinkException, UserNotFoundException {
+		InterviewUser newUser = userService.confirmEmail(id);
+		return new ResponseEntity<>(newUser.toDTO(), HttpStatus.OK);
+	}
+
 	/*
 	 * @PostMapping(path = "/setrole") public ResponseEntity<InterviewUserDTO>
 	 * setRole(@RequestBody InterviewUserDTO user) throws UserNotFoundException,
@@ -177,13 +138,110 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 			throws UserNotFoundException, UsernameExistsException, EmailExistsException {
 		authenticate(user.getUserName(), user.getPassword());
 		InterviewUserDTO loggedInUser = userService.findUserByUsername(user.getUserName()).toDTO();
+		userService.checkPasswordResetTable(loggedInUser);
 		UserPrincipal loggedInUserPrincipal = new UserPrincipal(loggedInUser);
 		HttpHeaders jwtHeader = getJwtHeader(loggedInUserPrincipal);
 		return new ResponseEntity<>(loggedInUser, jwtHeader, HttpStatus.OK);
 	}
+
+	/**
+	 * the 3 methods below are all used as part of the password reset functionality 
+	 */
 	
 	/**
+	 * this method is for people who have forgotten their password; it will send
+	 * them an email with a new password in it
+	 * @param email
+	 * @return
+	 * @throws MessagingException
+	 * @throws EmailNotFoundException
+	 */
+	@PostMapping("/forgotpassword")
+	public ResponseEntity<HttpResponse> forgotPassword(@RequestBody String email)
+			throws MessagingException, EmailNotFoundException {
+		userService.resetPasswordInitiation(email);
+		return response(HttpStatus.OK, EMAIL_SENT + email);
+	}
+
+	/**
+	 * this method is called upon initial load of the password reset page link that the user clicks in their email.
+	 * it checks to make sure that:
+	 * 1. there is an actual record in the password_rest table
+	 * 2. the record is not expired
+	 * @param code
+	 * @return
+	 * @throws ExpiredLinkException
+	 * @throws UserNotFoundException
+	 * @throws AddressException
+	 * @throws NoSuchProviderException
+	 * @throws SendFailedException
+	 * @throws MessagingException
+	 */
+	@PostMapping(path = "/checkreset")
+	public ResponseEntity<CheckPasswordResetResponseDTO> checkPasswordReset(@RequestBody String code)
+			throws ExpiredLinkException, UserNotFoundException, AddressException, NoSuchProviderException, SendFailedException, MessagingException {
+		CheckPasswordResetResponseDTO results = userService.checkPasswordResetTable(code);
+		return new ResponseEntity<>(results, HttpStatus.OK);
+	}
+	
+	/**
+	 * this method is called once the user actually resets their password on the page link that the user clicks in their email.
+	 * @param input
+	 * @return
+	 * @throws ExpiredLinkException
+	 * @throws UserNotFoundException
+	 * @throws AddressException
+	 * @throws NoSuchProviderException
+	 * @throws SendFailedException
+	 * @throws MessagingException
+	 * @throws PasswordResetException
+	 */
+	@PostMapping(path = "/finalizepassword")
+	public ResponseEntity<InterviewUserDTO> finalizePasswordReset(@RequestBody PasswordResetDTO input)
+			throws ExpiredLinkException, UserNotFoundException, AddressException, NoSuchProviderException, SendFailedException, MessagingException, PasswordResetException {
+		InterviewUserDTO results = userService.changePassword(input);
+		return new ResponseEntity<>(results, HttpStatus.OK);
+	}
+	
+	/**
+	 * this method is for people who have forgotten their username; it will send
+	 * them an email with their username in it
+	 * @param email
+	 * @return
+	 * @throws MessagingException
+	 * @throws EmailNotFoundException
+	 */
+	@PostMapping("/forgotusername")
+	public ResponseEntity<HttpResponse> forgotUsername(@RequestBody String email)
+			throws MessagingException, EmailNotFoundException {
+		userService.forgotUsername(email);
+		return response(HttpStatus.OK, EMAIL_SENT + email);
+	}
+
+	/**
+	 * update a InterviewUser
+	 * 
+	 * @param InterviewUserDTO
+	 * @return InterviewUser
+	 */
+	@PostMapping(path = "/updateuserbyuser")
+	@PreAuthorize("hasAnyAuthority('self:update')")
+	public ResponseEntity<InterviewUserDTO> updateUserByUser(@Valid @RequestBody InterviewUserDTOWrapper data)
+			throws Exception {
+		if (data.getNewPassword() != null) {
+			try {
+				authenticate(data.getUserName(), data.getPassword());
+			} catch (Exception e) {
+				throw new PasswordIncorrectException(INCORRECT_OLD_PASSWORD);
+			}
+		}
+		InterviewUserDTO updatedData = userService.updateUserByUser(data).toDTO();
+		return ResponseEntity.status(HttpStatus.OK).body(updatedData);
+	}
+
+	/**
 	 * get all InterviewUser records
+	 * 
 	 * @return Iterable<InterviewUser>
 	 */
 	@GetMapping(path = "/all")
@@ -195,6 +253,7 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 
 	/**
 	 * get InterviewUser by primary key
+	 * 
 	 * @param id
 	 * @return InterviewUser
 	 */
@@ -207,78 +266,71 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 
 	/**
 	 * create a new InterviewUser
+	 * 
 	 * @param InterviewUserDTO
 	 * @return InterviewUser
 	 */
 	@PostMapping(path = "/create")
 	@PreAuthorize("hasAnyAuthority('admin:create')")
-	public ResponseEntity<InterviewUserDTO> createInterviewUser(@RequestHeader("Authorization") String token, @Valid @RequestBody InterviewUserDTO data) throws Exception {
+	public ResponseEntity<InterviewUserDTO> createInterviewUser(@RequestHeader("Authorization") String token,
+			@Valid @RequestBody InterviewUserDTO data) throws Exception {
 		String alteredToken = removeBearerFromToken(token);
 		String adminUser = jwtTokenProvider.getSubject(alteredToken);
 		String[] authorizations = jwtTokenProvider.getClaimsFromToken(alteredToken);
-		InterviewUserDTO createdData = businessService.createInterviewUser(data,authorizations,adminUser);
+		InterviewUserDTO createdData = businessService.createInterviewUser(data, authorizations, adminUser);
 		return ResponseEntity.status(HttpStatus.CREATED).body(createdData);
-		
+
 	}
 
 	/**
-	 * update a InterviewUser
-	 * note: we cannot simply update via the primary key, as we never pass this value back out to the front end
-	 * so we have to update by username, and account for if they are changing the username
+	 * update a InterviewUser note: we cannot simply update via the primary key, as
+	 * we never pass this value back out to the front end so we have to update by
+	 * username, and account for if they are changing the username
+	 * 
 	 * @param InterviewUserDTO
 	 * @return InterviewUser
 	 */
 	@PostMapping(path = "/update")
 	@PreAuthorize("hasAnyAuthority('admin:update','user:update')")
-	public ResponseEntity<InterviewUserDTO> updateInterviewUser(@RequestHeader("Authorization") String token, @Valid @RequestBody InterviewUserDTOWrapper data) throws Exception {
+	public ResponseEntity<InterviewUserDTO> updateInterviewUser(@RequestHeader("Authorization") String token,
+			@Valid @RequestBody InterviewUserDTOWrapper data) throws Exception {
 		String alteredToken = removeBearerFromToken(token);
 		String adminUser = jwtTokenProvider.getSubject(alteredToken);
 		String[] authorizations = jwtTokenProvider.getClaimsFromToken(alteredToken);
-		InterviewUserDTO updatedData = businessService.updateInterviewUser(data,authorizations,adminUser);
+		InterviewUserDTO updatedData = businessService.updateInterviewUser(data, authorizations, adminUser);
 		return ResponseEntity.status(HttpStatus.OK).body(updatedData);
 	}
 
+	/**
+	 * 
+	 * @param token
+	 * @return
+	 */
 	private String removeBearerFromToken(String token) {
 		return token.replace(Constants.TOKEN_PREFIX, "");
 	}
 
 	/**
-	 * update a InterviewUser
-	 * @param InterviewUserDTO
-	 * @return InterviewUser
-	 */
-	@PostMapping(path = "/updateuserbyuser")
-	@PreAuthorize("hasAnyAuthority('self:update')")
-	public ResponseEntity<InterviewUserDTO> updateUserByUser(@Valid @RequestBody InterviewUserDTOWrapper data) throws Exception {
-		if(data.getNewPassword()!=null) {
-			try {
-				authenticate(data.getUserName(), data.getPassword());
-			} catch(Exception e) {
-				throw new PasswordIncorrectException(INCORRECT_OLD_PASSWORD);
-			}
-		}
-		InterviewUserDTO updatedData = userService.updateUserByUser(data).toDTO();
-		return ResponseEntity.status(HttpStatus.OK).body(updatedData);
-	}
-	
-	/**
 	 * delete a InterviewUser by their username
+	 * 
 	 * @param id
 	 */
 	@DeleteMapping(path = "/delete/{username}")
 	@PreAuthorize("hasAnyAuthority('admin:delete','user:delete')")
-	public ResponseEntity<ResponseMessage> deleteInterviewUser(@RequestHeader("Authorization") String token, @PathVariable String username) throws Exception {
+	public ResponseEntity<ResponseMessage> deleteInterviewUser(@RequestHeader("Authorization") String token,
+			@PathVariable String username) throws Exception {
 		String alteredToken = removeBearerFromToken(token);
 		String[] authorizations = jwtTokenProvider.getClaimsFromToken(alteredToken);
 		String adminUser = jwtTokenProvider.getSubject(alteredToken);
-		businessService.deleteInterviewUser(username,authorizations,adminUser);
+		businessService.deleteInterviewUser(username, authorizations, adminUser);
 		ResponseMessage rb = new ResponseMessage("successfully deleted");
 		return ResponseEntity.status(HttpStatus.OK).body(rb);
 	}
 
 	/**
-	 * method to call the AuthenticationManager to authenticate the user's username/password against what is stored
-	 * in the database
+	 * method to call the AuthenticationManager to authenticate the user's
+	 * username/password against what is stored in the database
+	 * 
 	 * @param userName
 	 * @param password
 	 */
@@ -287,7 +339,9 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	}
 
 	/**
-	 * method that makes an HttpHeaders object, generates the Jwt Token, and adds it to the headers 
+	 * method that makes an HttpHeaders object, generates the Jwt Token, and adds it
+	 * to the headers
+	 * 
 	 * @param loggedInUserPrincipal
 	 * @return
 	 */
@@ -297,23 +351,60 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 		headers.add(Constants.JWT_TOKEN_HEADER, this.jwtTokenProvider.generateJwtToken(loggedInUserPrincipal));
 		return headers;
 	}
-	
+
 	/**
 	 * method for creating an HttpResponse netity
+	 * 
 	 * @param httpStatus
 	 * @param message
 	 * @return
 	 */
 	private ResponseEntity<HttpResponse> response(HttpStatus httpStatus, String message) {
-        return new ResponseEntity<>(new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase().toUpperCase(),
-                message), httpStatus);
-    }
+		return new ResponseEntity<>(
+				new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase().toUpperCase(), message),
+				httpStatus);
+	}
+
 	/**
 	 * logging method
+	 * 
 	 * @param message
 	 */
 	private static void logAction(String message) {
-    	System.out.println(message);
-    	applicationLogger.debug(message);
-    }
+		System.out.println(message);
+		applicationLogger.debug(message);
+	}
+
+	@PostMapping(path = "/setrole")
+	public ResponseEntity<InterviewUserDTO> setRole(@RequestBody InterviewUserDTO user)
+			throws UserNotFoundException, UsernameExistsException, EmailExistsException, AddressException,
+			MessagingException, UserFieldsNotValidException {
+		userService.setRole(user.getUserName());
+		return new ResponseEntity<>(user, HttpStatus.OK);
+	}
+
+	/**
+	 * 
+	 * @param user
+	 * @return
+	 * @throws UserNotFoundException
+	 * @throws UsernameExistsException
+	 * @throws EmailExistsException
+	 * @throws AddressException
+	 * @throws MessagingException
+	 * @throws UserFieldsNotValidException
+	 */
+	@PostMapping(path = "/setpwd")
+	public ResponseEntity<InterviewUserDTO> setPassword(@RequestBody InterviewUserDTO user)
+			throws UserNotFoundException, UsernameExistsException, EmailExistsException, AddressException,
+			MessagingException, UserFieldsNotValidException {
+		userService.setPassword(user.getUserName(), user.getPassword());
+		return new ResponseEntity<>(user, HttpStatus.OK);
+	}
+
+	@GetMapping("/testemail")
+	public ResponseEntity<HttpResponse> testEmail() {
+		userService.testEmail();
+		return response(HttpStatus.OK, EMAIL_SENT);
+	}
 }
