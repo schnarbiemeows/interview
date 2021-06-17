@@ -45,6 +45,13 @@ public class QuestionCategory implements Serializable {
 	 */
 	@Column(name = "evnt_oper_id")
 	private String evntOperId;
+	
+	/**
+	 * some categories we only want certain people(me) to see
+	 * default is "Y", which means everyone can see
+	 */
+	@Column(name = "display_cde")
+	private String displayCde;
 
 	/**
 	 * default constructor
@@ -53,12 +60,13 @@ public class QuestionCategory implements Serializable {
 		super();
 	}
 
-	public QuestionCategory(Integer questionCategoryId, String questionCategoryDesc, Date evntTmestmp, String evntOperId) {
+	public QuestionCategory(Integer questionCategoryId, String questionCategoryDesc, Date evntTmestmp, String evntOperId, String displayCde) {
 		super();
 		this.questionCategoryId = questionCategoryId;
 		this.questionCategoryDesc = questionCategoryDesc;
 		this.evntTmestmp = evntTmestmp;
 		this.evntOperId = evntOperId;
+		this.displayCde = displayCde;
 	}
 
 	public Integer getQuestionCategoryId() {
@@ -93,9 +101,17 @@ public class QuestionCategory implements Serializable {
 		this.evntOperId=evntOperId;
 	}
 
+	public String getDisplayCde() {
+		return displayCde;
+	}
+
+	public void setDisplayCde(String displayCde) {
+		this.displayCde = displayCde;
+	}
+
 	@Override
 	public String toString() {
-		return "QuestionCategory [questionCategoryId=" + questionCategoryId + ", questionCategoryDesc=" + questionCategoryDesc + ", evntTmestmp=" + evntTmestmp + ", evntOperId=" + evntOperId + "]";
+		return "QuestionCategory [questionCategoryId=" + questionCategoryId + ", questionCategoryDesc=" + questionCategoryDesc + ", evntTmestmp=" + evntTmestmp + ", evntOperId=" + evntOperId + ", displayCde=" + displayCde + "]";
 	}
 
 	public static QuestionCategory fromJson(String input) {
@@ -103,6 +119,6 @@ public class QuestionCategory implements Serializable {
 		return gson.fromJson(input, QuestionCategory.class );
 	}
 	public QuestionCategoryDTO toDTO() {
-		return new QuestionCategoryDTO(this.getQuestionCategoryId(),this.getQuestionCategoryDesc(),this.getEvntTmestmp(),this.getEvntOperId());
+		return new QuestionCategoryDTO(this.getQuestionCategoryId(),this.getQuestionCategoryDesc(),this.getEvntTmestmp(),this.getEvntOperId(),this.getDisplayCde());
 	}
 }

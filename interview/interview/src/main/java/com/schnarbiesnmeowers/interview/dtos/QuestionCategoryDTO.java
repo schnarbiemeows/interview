@@ -39,18 +39,24 @@ public class QuestionCategoryDTO implements Serializable {
 	private String evntOperId;
 
 	/**
+	 * 
+	 */
+	private String displayCde;
+	
+	/**
 	 * default constructor
 	 */
 	public QuestionCategoryDTO() {
 		super();
 	}
 
-	public QuestionCategoryDTO(Integer questionCategoryId, String questionCategoryDesc, Date evntTmestmp, String evntOperId) {
+	public QuestionCategoryDTO(Integer questionCategoryId, String questionCategoryDesc, Date evntTmestmp, String evntOperId, String displayCde) {
 		super();
 		this.questionCategoryId = questionCategoryId;
 		this.questionCategoryDesc = questionCategoryDesc;
 		this.evntTmestmp = evntTmestmp;
 		this.evntOperId = evntOperId;
+		this.displayCde = displayCde;
 	}
 
 	public Integer getQuestionCategoryId() {
@@ -85,9 +91,17 @@ public class QuestionCategoryDTO implements Serializable {
 		this.evntOperId=evntOperId;
 	}
 
+	public String getDisplayCde() {
+		return displayCde;
+	}
+
+	public void setDisplayCde(String displayCde) {
+		this.displayCde = displayCde;
+	}
+
 	@Override
 	public String toString() {
-		return "QuestionCategoryDTO [questionCategoryId=" + questionCategoryId + ", questionCategoryDesc=" + questionCategoryDesc + ", evntTmestmp=" + evntTmestmp + ", evntOperId=" + evntOperId + "]";
+		return "QuestionCategoryDTO [questionCategoryId=" + questionCategoryId + ", questionCategoryDesc=" + questionCategoryDesc + ", evntTmestmp=" + evntTmestmp + ", evntOperId=" + evntOperId + ", displayCde=" + displayCde + "]";
 	}
 
 	public static QuestionCategoryDTO fromJson(String input) {
@@ -95,6 +109,6 @@ public class QuestionCategoryDTO implements Serializable {
 		return gson.fromJson(input, QuestionCategoryDTO.class );
 	}
 	public QuestionCategory toEntity() {
-		return new QuestionCategory(this.getQuestionCategoryId(),this.getQuestionCategoryDesc(),this.getEvntTmestmp(),this.getEvntOperId());
+		return new QuestionCategory(this.getQuestionCategoryId(),this.getQuestionCategoryDesc(),this.getEvntTmestmp(),this.getEvntOperId(),this.getDisplayCde());
 	}
 }
