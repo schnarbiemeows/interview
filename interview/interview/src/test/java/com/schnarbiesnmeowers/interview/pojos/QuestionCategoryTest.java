@@ -27,12 +27,14 @@ public class QuestionCategoryTest {
 		classUnderTest.setQuestionCategoryDesc("a");
 		classUnderTest.setEvntTmestmp(new Date());
 		classUnderTest.setEvntOperId("a");
+		classUnderTest.setDisplayCde("Y");
 		assertTrue(true);
 		QuestionCategory newitem = new QuestionCategory(
 		classUnderTest.getQuestionCategoryId(),
 		classUnderTest.getQuestionCategoryDesc(),
 		classUnderTest.getEvntTmestmp(),
-		classUnderTest.getEvntOperId());
+		classUnderTest.getEvntOperId(),
+		classUnderTest.getDisplayCde());
 		assertNotNull(newitem);
 		String string = classUnderTest.toString();
 		assertNotNull(string);

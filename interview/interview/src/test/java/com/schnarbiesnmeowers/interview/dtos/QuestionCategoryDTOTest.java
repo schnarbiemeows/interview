@@ -27,12 +27,14 @@ public class QuestionCategoryDTOTest {
 		classUnderTest.setQuestionCategoryDesc("a");
 		classUnderTest.setEvntTmestmp(new Date());
 		classUnderTest.setEvntOperId("a");
+		classUnderTest.setDisplayCde("Y");
 		assertTrue(true);
 		QuestionCategoryDTO newitem = new QuestionCategoryDTO(
 		classUnderTest.getQuestionCategoryId(),
 		classUnderTest.getQuestionCategoryDesc(),
 		classUnderTest.getEvntTmestmp(),
-		classUnderTest.getEvntOperId());
+		classUnderTest.getEvntOperId(),
+		classUnderTest.getDisplayCde());
 		assertNotNull(newitem);
 		String string = classUnderTest.toString();
 		assertNotNull(string);
