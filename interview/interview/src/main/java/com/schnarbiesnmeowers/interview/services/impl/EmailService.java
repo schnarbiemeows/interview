@@ -55,7 +55,7 @@ import com.sun.mail.smtp.SMTPTransport;
 @Service
 public class EmailService {
 
-	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
+	private static final Logger emailLogger = LogManager.getLogger("EmailAppender");
 	
 	@Value("${email.username}")
 	private String username;
@@ -92,19 +92,23 @@ public class EmailService {
 	 * @throws AddressException 
 	 */
 	public void sendConfirmEmailEmail(String emailAddress,String uniqueId) throws AddressException, MessagingException {
+		logEmailAction("sendConfirmEmailEmail - entering, emailAddress = " + emailAddress);
 		//successEmailUrl = "http://127.0.0.1:4200";
 		String pageLink = successEmailUrl + "/confirmemail";
 		EmailTemplate template = new VerifyRegistrationEmailTemplate(emailAddress,username,pageLink,uniqueId,linkExpirationTime);
-		createAndSendEmail(template);		
+		createAndSendEmail(template);
+		logEmailAction("sendConfirmEmailEmail - leaving, emailAddress = " + emailAddress);
 	}
 
 	public void sendForgotPasswordEmail(String emailAddress,String uniqueId) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException {
+		logEmailAction("sendForgotPasswordEmail - entering, emailAddress = " + emailAddress);
 		//successEmailUrl = "http://127.0.0.1:4200";
 		String pageLink = successEmailUrl + "/passwordreset";
 		String loginUrl = successEmailUrl + "/login";
 		System.out.println(uniqueId);
 		EmailTemplate template = new ForgotPasswordEmailTemplate(emailAddress,pageLink,loginUrl,uniqueId,linkExpirationTime);
 		createAndSendEmail(template);
+		logEmailAction("sendForgotPasswordEmail - leaving, emailAddress = " + emailAddress);
 	}
 
 	/**
@@ -116,10 +120,12 @@ public class EmailService {
 	 * @throws MessagingException
 	 */
 	public void sendEmailWithUsername(String emailAddress,String username) throws AddressException, MessagingException {
+		logEmailAction("sendEmailWithUsername - entering, emailAddress = " + emailAddress);
 		//successEmailUrl = "http://127.0.0.1:4200";
 		String loginUrl = successEmailUrl + "/login";
 		EmailTemplate template = new ForgotUsernameEmailTemplate(emailAddress, username, loginUrl);
-		createAndSendEmail(template);	
+		createAndSendEmail(template);
+		logEmailAction("sendEmailWithUsername - leaving, emailAddress = " + emailAddress);
 	}
 
 	/**
@@ -133,12 +139,14 @@ public class EmailService {
 	 */
 	public void sendNoAddressFoundEmail(String emailAddress, boolean reset) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException {
 		EmailTemplate template = null;
+		logEmailAction("sendNoAddressFoundEmail - entering, emailAddress = " + emailAddress);
 		if(reset) {
 			template = new NoAddressFoundPREmailTemplate(emailAddress);
 		} else {
 			template = new NoAddressFoundUREmailTemplate(emailAddress);
 		}
 		createAndSendEmail(template);
+		logEmailAction("sendNoAddressFoundEmail - leaving, emailAddress = " + emailAddress);
 	}
 
 	/**
@@ -151,18 +159,22 @@ public class EmailService {
 	 * @throws MessagingException
 	 */
 	public void sendManagementEmail(String subject, String body) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException {
+		logEmailAction("sendManagementEmail - entering");
 		EmailTemplate template = new ManagementEmailTemplate(subject, body);
 		template.setEmailAddress(cc);
-		createAndSendEmail(template);	
+		createAndSendEmail(template);
+		logEmailAction("sendManagementEmail - leaving");
 	}
 
 	private void createAndSendEmail(EmailTemplate template)
 			throws AddressException, MessagingException, NoSuchProviderException, SendFailedException {
+		logEmailAction("createAndSendEmail - sending email");
 		Message message = createEmail(template);
 		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
 		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
 		transport.sendMessage(message, message.getAllRecipients());
 		transport.close();
+		logEmailAction("createAndSendEmail - email sent");
 	}
 
 	/**
@@ -173,6 +185,7 @@ public class EmailService {
 	 * @throws MessagingException
 	 */
 	private Message createEmail(EmailTemplate template) throws AddressException, MessagingException {
+		logEmailAction("createEmail - creating email");
 		Message message = new MimeMessage(getEmailSession());
 		message.setFrom(new InternetAddress(FROM_EMAIL));
 		message.setRecipients(Message.RecipientType.TO,InternetAddress.parse(template.getEmailAddress()));
@@ -188,6 +201,7 @@ public class EmailService {
 	    message.setContent(multipart,"text/html");
 		message.setSentDate(new Date());
 		message.saveChanges();
+		logEmailAction("createEmail - email created");
 		return message;
 	}
 
@@ -206,7 +220,7 @@ public class EmailService {
 	}
 	
 	public void testEmail() {
-		logAction("entering testEmail()");
+		logEmailAction("entering testEmail()");
 		String emailAddress = "dylanikessler@yahoo.com";
 		try {
 			sendConfirmEmailEmail(emailAddress,"XXX");
@@ -220,15 +234,15 @@ public class EmailService {
 //		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
 //		transport.sendMessage(message, message.getAllRecipients());
 //		transport.close();	
-		logAction("Sent test email to --> " + cc);
+		logEmailAction("Sent test email to --> " + cc);
 		} catch(AddressException ae) {
-			logAction("AddressException sending test email --> " + ae.getMessage());
+			logEmailAction("AddressException sending test email --> " + ae.getMessage());
 		} catch(MessagingException me) {
-			logAction("MessagingException sending test email  --> " + me.getMessage());
+			logEmailAction("MessagingException sending test email  --> " + me.getMessage());
 		} catch(Exception ee) {
-			logAction("General Exception sending test email  --> " + ee.getMessage());
+			logEmailAction("General Exception sending test email  --> " + ee.getMessage());
 		}
-		logAction("leaving testEmail()");
+		logEmailAction("leaving testEmail()");
 	}
 	
 //	public void testEmail() {
@@ -315,11 +329,11 @@ public class EmailService {
 //	}
 	
 	/**
-	 * 
+	 * logging method
 	 * @param message
 	 */
-	private static void logAction(String message) {
-    	System.out.println(message);
-    	applicationLogger.debug(message);
-    }
+	private static void logEmailAction(String message) {
+		System.out.println("EmailService: " + message);
+		emailLogger.debug("EmailService: " + message);
+	}
 }

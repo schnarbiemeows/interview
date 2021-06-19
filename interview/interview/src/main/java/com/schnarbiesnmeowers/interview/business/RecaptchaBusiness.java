@@ -31,15 +31,19 @@ public class RecaptchaBusiness {
     private RestOperations restTemplate;
 	
 	public GoogleResponseDTO validateRecaptcha(String response) throws Exception {
+		logAction("validating recaptcha");
 		GoogleResponseDTO googleResponse = null;
 		if(!responseSanityCheck(response)) {
+			logAction("recaptcha failed sanity check");
             throw new InvalidReCaptchaException("Response contains invalid characters");
         }
 		URI verifyUri = URI.create(String.format(google_url+"?secret=%s&response=%s",secret, response));
 		googleResponse = restTemplate.getForObject(verifyUri, GoogleResponseDTO.class);
 		if(!googleResponse.isSuccess()) {
+			logAction("recaptcha failed the backend call to google");
             throw new ReCaptchaInvalidException("reCaptcha was not successfully validated");
         } 
+		logAction("recaptcha validated");
 		return googleResponse;
 	}
 	

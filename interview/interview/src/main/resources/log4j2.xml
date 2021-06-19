@@ -10,6 +10,7 @@
 			follow="true">
 			<PatternLayout pattern="${LOG_PATTERN}" />
 		</Console>
+		
 		<RollingFile name="FileAppender"
 			fileName="/home/ubuntu/logs/interview/interview.log"
 			filePattern="/home/ubuntu/logs/interview/interview-%d{yyyy-MM-dd}-%i.log">
@@ -21,6 +22,31 @@
 			</Policies>
 			<DefaultRolloverStrategy max="10" />
 		</RollingFile>
+		
+		<RollingFile name="EmailAppender"
+			fileName="/home/ubuntu/logs/interview/emailLogs.log"
+			filePattern="/home/ubuntu/logs/interview/interview-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout>
+				<Pattern>${LOG_PATTERN}</Pattern>
+			</PatternLayout>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+		
+		<RollingFile name="IpAppender"
+			fileName="/home/ubuntu/logs/interview/ipAddresses.log"
+			filePattern="/home/ubuntu/logs/interview/interview-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout>
+				<Pattern>${LOG_PATTERN}</Pattern>
+			</PatternLayout>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+		
 	</Appenders>
 	<Loggers>
 		<Logger name="com.example.log4j2demo" level="debug"
@@ -29,6 +55,12 @@
 		</Logger>
 		<Logger name="FileAppender" level="debug" additivity="false">
 			<AppenderRef ref="FileAppender" />
+		</Logger>
+		<Logger name="IpAppender" level="debug" additivity="false">
+			<AppenderRef ref="IpAppender" />
+		</Logger>
+		<Logger name="EmailAppender" level="debug" additivity="false">
+			<AppenderRef ref="EmailAppender" />
 		</Logger>
 		<Root level="info">
 			<AppenderRef ref="ConsoleAppender" />

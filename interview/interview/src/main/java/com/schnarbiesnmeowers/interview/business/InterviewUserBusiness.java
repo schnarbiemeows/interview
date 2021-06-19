@@ -243,10 +243,6 @@ public class InterviewUserBusiness {
 		return "Successfully Deleted";
 	}
 	
-	private static void logAction(String message) {
-    	System.out.println(message);
-    	applicationLogger.debug(message);
-    }
 
 	/**
 	 * this method checks to make sure the restration data that a new user has entered is valid
@@ -254,23 +250,39 @@ public class InterviewUserBusiness {
 	 * @throws UserFieldsNotValidException
 	 */
 	public void validateFields(InterviewUserTempDTO user) throws UserFieldsNotValidException {
+		logAction("validating the registration fields");
 		if(user.getUserName()==null||user.getUserName().isEmpty()) {
+			logAction("username is empty");
 			throw new UserFieldsNotValidException("username must have a value");
 		}
 		if(user.getEmailAddr()==null||user.getEmailAddr().isEmpty()) {
+			logAction("email address is empty");
 			throw new UserFieldsNotValidException("email must have a value");
 		}
 		if(user.getFirstName()==null||user.getFirstName().isEmpty()) {
+			logAction("first name is empty");
 			throw new UserFieldsNotValidException("first name must have a value");
 		}
 		if(user.getLastName()==null||user.getLastName().isEmpty()) {
+			logAction("last name is empty");
 			throw new UserFieldsNotValidException("last name must have a value");
 		}
 		Pattern pattern = Pattern.compile(regex);
 		Matcher matcher = pattern.matcher(user.getEmailAddr());
 		if(!matcher.matches()) {
+			logAction("email address is not valid");
 			throw new UserFieldsNotValidException("this email address is not valid");
 		}
+	}
+	
+	/**
+	 * logging method
+	 * 
+	 * @param message
+	 */
+	private static void logAction(String message) {
+		System.out.println("InterviewUserBusiness: " + message);
+		applicationLogger.debug("InterviewUserBusiness: " + message);
 	}
 
 }

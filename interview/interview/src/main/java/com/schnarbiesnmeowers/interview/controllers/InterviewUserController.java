@@ -64,6 +64,7 @@ import com.schnarbiesnmeowers.interview.utilities.Constants;
 public class InterviewUserController extends InterviewUserExceptionHandling {
 
 	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
+	private static final Logger emailLogger = LogManager.getLogger("EmailAppender");
 	public static final String EMAIL_SENT = "An email with a new password was sent to: ";
 	public static final String USER_DELETED_SUCCESSFULLY = "User deleted successfully";
 
@@ -104,7 +105,9 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	public ResponseEntity<InterviewUserDTO> register(@RequestBody InterviewUserTempDTO user)
 			throws UserNotFoundException, UsernameExistsException, EmailExistsException, AddressException,
 			MessagingException, UserFieldsNotValidException {
+		logAction("attempting to validate new user registration");
 		businessService.validateFields(user);
+		logAction("new user registration validated");
 		InterviewUser newUser = userService.register(user.getFirstName(), user.getLastName(), user.getUserName(),
 				user.getEmailAddr(), user.getPassword());
 		return new ResponseEntity<>(newUser.toDTO(), HttpStatus.OK);
@@ -113,7 +116,9 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	@PostMapping(path = "/confirmemail")
 	public ResponseEntity<InterviewUserDTO> confirmEmail(@RequestBody String id)
 			throws ExpiredLinkException, UserNotFoundException {
+		logEmailAction("initiating email confirmation process");
 		InterviewUser newUser = userService.confirmEmail(id);
+		logEmailAction("email confirmation process completed");
 		return new ResponseEntity<>(newUser.toDTO(), HttpStatus.OK);
 	}
 
@@ -136,11 +141,14 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	@PostMapping(path = "/login")
 	public ResponseEntity<InterviewUserDTO> login(@RequestBody InterviewUserDTO user)
 			throws UserNotFoundException, UsernameExistsException, EmailExistsException {
+		logAction("initiating the login process, authenticating the user");
 		authenticate(user.getUserName(), user.getPassword());
+		logAction("user has been authenticated");
 		InterviewUserDTO loggedInUser = userService.findUserByUsername(user.getUserName()).toDTO();
 		userService.checkPasswordResetTable(loggedInUser);
 		UserPrincipal loggedInUserPrincipal = new UserPrincipal(loggedInUser);
 		HttpHeaders jwtHeader = getJwtHeader(loggedInUserPrincipal);
+		logAction("login process completed");
 		return new ResponseEntity<>(loggedInUser, jwtHeader, HttpStatus.OK);
 	}
 
@@ -159,7 +167,9 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	@PostMapping("/forgotpassword")
 	public ResponseEntity<HttpResponse> forgotPassword(@RequestBody String email)
 			throws MessagingException, EmailNotFoundException {
+		logEmailAction("initiating the forgot password reset process");
 		userService.resetPasswordInitiation(email);
+		logEmailAction("forgot password reset process completed");
 		return response(HttpStatus.OK, EMAIL_SENT + email);
 	}
 
@@ -180,7 +190,9 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	@PostMapping(path = "/checkreset")
 	public ResponseEntity<CheckPasswordResetResponseDTO> checkPasswordReset(@RequestBody String code)
 			throws ExpiredLinkException, UserNotFoundException, AddressException, NoSuchProviderException, SendFailedException, MessagingException {
+		logEmailAction("initiating the check password reset process");
 		CheckPasswordResetResponseDTO results = userService.checkPasswordResetTable(code);
+		logEmailAction("check password reset process completed");
 		return new ResponseEntity<>(results, HttpStatus.OK);
 	}
 	
@@ -199,7 +211,9 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	@PostMapping(path = "/finalizepassword")
 	public ResponseEntity<InterviewUserDTO> finalizePasswordReset(@RequestBody PasswordResetDTO input)
 			throws ExpiredLinkException, UserNotFoundException, AddressException, NoSuchProviderException, SendFailedException, MessagingException, PasswordResetException {
+		logEmailAction("initiating the password reset finalization process");
 		InterviewUserDTO results = userService.changePassword(input);
+		logEmailAction("password reset finalization process completed");
 		return new ResponseEntity<>(results, HttpStatus.OK);
 	}
 	
@@ -214,7 +228,9 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	@PostMapping("/forgotusername")
 	public ResponseEntity<HttpResponse> forgotUsername(@RequestBody String email)
 			throws MessagingException, EmailNotFoundException {
+		logEmailAction("initiating the forgot username email process");
 		userService.forgotUsername(email);
+		logEmailAction("forgot username email process completed");
 		return response(HttpStatus.OK, EMAIL_SENT + email);
 	}
 
@@ -365,16 +381,6 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 				httpStatus);
 	}
 
-	/**
-	 * logging method
-	 * 
-	 * @param message
-	 */
-	private static void logAction(String message) {
-		System.out.println(message);
-		applicationLogger.debug(message);
-	}
-
 	@PostMapping(path = "/setrole")
 	public ResponseEntity<InterviewUserDTO> setRole(@RequestBody InterviewUserDTO user)
 			throws UserNotFoundException, UsernameExistsException, EmailExistsException, AddressException,
@@ -404,7 +410,29 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 
 	@GetMapping("/testemail")
 	public ResponseEntity<HttpResponse> testEmail() {
+		logEmailAction("running an email test");
 		userService.testEmail();
+		logEmailAction("email test complete");
 		return response(HttpStatus.OK, EMAIL_SENT);
+	}
+	
+	/**
+	 * logging method
+	 * 
+	 * @param message
+	 */
+	private static void logAction(String message) {
+		System.out.println("InterviewUserController: " + message);
+		applicationLogger.debug("InterviewUserController: " + message);
+	}
+	
+	/**
+	 * logging method
+	 * 
+	 * @param message
+	 */
+	private static void logEmailAction(String message) {
+		System.out.println("InterviewUserController: " + message);
+		emailLogger.debug("InterviewUserController: " + message);
 	}
 }

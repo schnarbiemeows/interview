@@ -83,6 +83,7 @@ import com.schnarbiesnmeowers.interview.utilities.Roles;
 public class UserServiceImpl implements UserService, UserDetailsService {
 
 	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
+	private static final Logger emailLogger = LogManager.getLogger("EmailAppender");
 	
 	private InterviewUserRepository repository;
 	private InterviewUserTempRepository tempRepository;
@@ -125,6 +126,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 */
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		logAction("finding User - " + username);
 		InterviewUser user = repository.findUserByUserName(username);
 		if(user == null) {
 			logAction("User - " + username + " not found!");
@@ -156,14 +158,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 * @throws AddressException 
 	 */
 	private void validateLoginAttempt(InterviewUser user) throws AddressException, MessagingException {
+		logAction("validateLoginAttempt for User - " + user.getUserName());
 		if(user.isUserNotLocked()) {
 			if(this.loginAttemptService.hasExceededMaxAttempts(user.getUserName())) {
+				logAction("locking User - " + user.getUserName());
 				user.setUserNotLocked(false);
 				this.emailService.sendManagementEmail("Interview Program - Locked Account","the account for username = " + user.getUserName() + " was locked");
 			} else {
+				logAction("unlocking User - " + user.getUserName());
 				user.setUserNotLocked(true);
 			}
 		} else {
+			logAction("User - " + user.getUserName() + " is locked");
 			this.loginAttemptService.evictUserFromLoginCache(user.getUserName());
 		}
 	}
@@ -185,7 +191,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 */
 	@Override
 	public InterviewUser register(String firstName, String lastName, String username, String email, String password) throws UserNotFoundException, UsernameExistsException, EmailExistsException, AddressException, MessagingException {
+		logAction("inside register; validating username and email");
 		validateNewUsernameAndEmail(StringUtils.EMPTY,username,email);
+		logAction("username and email validation passed");
 		InterviewUser user = new InterviewUser();
 		InterviewUserTemp tempUser = new InterviewUserTemp();
 		String uniqueId = generateUniqueId();
@@ -220,6 +228,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		user.setProfileImage(getTemporaryImageUrl(username));
 		tempRepository.save(tempUser);
 		logAction("New user identifier = " + userIdentifier);
+		logEmailAction("sending the confirm email for a new registrant");
 		this.emailService.sendConfirmEmailEmail(email,uniqueId);
 		return user;
 	}
@@ -234,17 +243,23 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 */
 	@Override
 	public InterviewUser confirmEmail(String id) throws ExpiredLinkException, UserNotFoundException {
+		logEmailAction("inside the confirmEmail method after the user click the confirm email link");
+		logEmailAction("id = " + id);
 		InterviewUserTemp tempUser = tempRepository.findUserByUniqueId(id);
 		if(tempUser == null) {
+			logEmailAction("not record found in interview_user_temp for id = " + id);
     		throw new UserNotFoundException(NO_USER_FOUND_BY_ID);
     	}
 		if(isTheRecordExpired(tempUser.getCreatedDate())) {
+			logEmailAction("record found in interview_user_temp, but is EXPIRED for id = " + id);
 			tempRepository.delete(tempUser);
 			throw new ExpiredLinkException(EXPIRED_LINK);
 		}
+		logEmailAction("record found in interview_user_temp, copying over for id = " + id);
 		InterviewUser newUser = copyOverFromTempRecord(tempUser);
 		repository.save(newUser);
 		tempRepository.delete(tempUser);
+		logEmailAction("leaving the confirmEmail method");
 		return newUser;
 	}
 	
@@ -257,7 +272,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	private boolean isTheRecordExpired(Date recordDate) {
 		Date today = new Date();
 		long difference = today.getTime() - recordDate.getTime();
-		System.out.println("difference = " + difference);
+		logEmailAction("difference = " + difference);
 		if(difference > linkExpirationTime*60000) {
 			return true;
 		}
@@ -284,7 +299,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 * @return
 	 */
 	 public void setPassword(String username, String password) {
-		 logAction("New user identifier = " + username + " to --> " + password);
+		logAction("New user identifier = " + username + " to --> " + password);
 	 	InterviewUser user = repository.findUserByUserName(username); String
 	 	encodedPassword = encodePassword(password);
 	 	user.setPassword(encodedPassword); 
@@ -367,13 +382,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         	// this is not a new person trying to register
         	InterviewUser currentUser = findUserByUsername(currentUsername);
         	if(currentUser == null) {
+        		logAction("currentUser is null");
         		throw new UserNotFoundException(NO_USER_FOUND_BY_USERNAME + currentUsername);
         	}
         	InterviewUser newUser = findUserByUsername(newUsername);
         	if(newUser != null && !newUser.getUserId().equals(currentUser.getUserId())) {
+        		logAction("login: username is already taken");
         		throw new UsernameExistsException(USERNAME_ALREADY_EXISTS);
         	}
         	InterviewUser userByEmail = findUserByEmail(newEmail);
+        	logAction("email address is already taken");
         	if(userByEmail != null && !userByEmail.getUserId().equals(currentUser.getUserId())) {
         		throw new EmailExistsException(A_USER_WITH_THIS_EMAIL_ALREADY_EXISTS);
         	}
@@ -382,10 +400,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         	// this is a new person trying to register
         	InterviewUser newUser = findUserByUsername(newUsername);
         	if(newUser != null) {
+        		logAction("registration: username is already taken");
         		throw new UsernameExistsException(USERNAME_ALREADY_EXISTS);
         	}
         	InterviewUser userByEmail = findUserByEmail(newEmail);
         	if(userByEmail != null) {
+        		logAction("registration: email address is already taken");
         		throw new EmailExistsException(A_USER_WITH_THIS_EMAIL_ALREADY_EXISTS);
         	}
         	return null;
@@ -688,15 +708,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	private Roles getRoleEnumName(String role) {
 		return Roles.valueOf(role.toUpperCase());
 	}
-	
-	/**
-	 * logger method
-	 * @param message
-	 */
-	private static void logAction(String message) {
-    	System.out.println(message);
-    	applicationLogger.debug(message);
-    }
 
 	/**
 	 * test method for testing the email functionality
@@ -719,9 +730,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 */
 	@Override
 	public CheckPasswordResetResponseDTO checkPasswordResetTable(String id) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException {
+		logBothAction("inside checkPasswordResetTable for id = " + id);
 		CheckPasswordResetResponseDTO  results = null;
 		PasswordReset resetRecord = passwordResetRepository.findUserByUniqueId(id);
 		if(resetRecord == null) {
+			logBothAction("no record found in password_reset for id = " + id);
 			this.emailService.sendManagementEmail("Interview Program: checkPasswordResetTable issue", "A check on the password_reset table for the unique id = " + id + " has failed!");
 			results = new CheckPasswordResetResponseDTO(false,null,null);
 		} else {
@@ -729,16 +742,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 			// check to see if the timestamp has expired
 			boolean expiredRecord = isTheRecordExpired(resetRecord.getCreatedDate());
 			if(expiredRecord) {
+				logBothAction("record found in password_reset, but is EXPIRED for id = " + id);
 				passwordResetRepository.delete(resetRecord);
 				results = new CheckPasswordResetResponseDTO(false,emailAdddress,null);
 			} else {
+				logBothAction("record found in password_reset for id = " + id);
 				// if a valid record is found, change the unique ID, and send back (true,emailAddress,newUniqueId)
 				String newUniqueId = generateUserIdentifier();
 				resetRecord.setUniqueId(newUniqueId);
+				logBothAction("changing the unique Id to : " + newUniqueId);
 				passwordResetRepository.save(resetRecord);
 				results = new CheckPasswordResetResponseDTO(true,emailAdddress,newUniqueId);
 			}
 		}
+		logBothAction("leaving checkPasswordResetTable for id = " + id);
 		return results;
 	}
 
@@ -768,21 +785,54 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 */
 	@Override
 	public InterviewUserDTO changePassword(PasswordResetDTO input) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException, PasswordResetException {
+		logAction("inside changePassword, changing the password for unique Id = " + input.getUniqueId());
 		PasswordReset resetRecord = passwordResetRepository.findUserByUniqueId(input.getUniqueId());
 		if(resetRecord == null) {
+			logAction("inside changePassword, no record was found for unique Id = " + input.getUniqueId());
 			this.emailService.sendManagementEmail("Interview Program: checkPasswordResetTable issue", "A final check on the password_reset table for the unique id = " + input.getUniqueId() + " has failed, the record was not found!");
 			throw new PasswordResetException("We're sorry, but there was an issue with your request");
 		}
 		if(!resetRecord.getEmailAddr().equals(input.getEmailAddress())) {
+			logAction("inside changePassword, email address did not match the one found in the record for unique Id = " + input.getUniqueId());
 			this.emailService.sendManagementEmail("Interview Program: checkPasswordResetTable issue", "A final check on the password_reset table for the unique id = " + input.getUniqueId() + " has failed, the email addresses did not match!");
 			throw new PasswordResetException("We're sorry, but there was an issue with your request");
 		}
+		logAction("inside changePassword, password_reset record was found unique Id = " + input.getUniqueId());
 		InterviewUser user = repository.findUserByEmailAddr(input.getEmailAddress());
+		logAction("inside changePassword, user : " + user.getUserName() + " was retrieved, changing their password");
 		String encodedPassword = encodePassword(input.getPassword());
 		user.setPassword(encodedPassword);
 		repository.save(user);
 		passwordResetRepository.delete(resetRecord);
+		logAction("leaving changePassword, user : " + user.getUserName());
 		return user.toDTO();
+	}
+	
+	/**
+	 * logger method
+	 * @param message
+	 */
+	private static void logBothAction(String message) {
+		System.out.println("UserServiceImpl: " + message);
+		applicationLogger.debug("UserServiceImpl: " + message);
+		emailLogger.debug("UserServiceImpl: " + message);
+	}
+	/**
+	 * logger method
+	 * @param message
+	 */
+	private static void logAction(String message) {
+    	System.out.println("UserServiceImpl: " + message);
+    	applicationLogger.debug("UserServiceImpl: " + message);
+    }
+	
+	/**
+	 * logging method
+	 * @param message
+	 */
+	private static void logEmailAction(String message) {
+		System.out.println("UserServiceImpl: " + message);
+		emailLogger.debug("UserServiceImpl: " + message);
 	}
 
 }

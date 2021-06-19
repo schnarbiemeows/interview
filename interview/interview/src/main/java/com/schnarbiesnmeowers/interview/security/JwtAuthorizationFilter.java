@@ -31,7 +31,7 @@ import com.schnarbiesnmeowers.interview.utilities.Constants;
 @Component
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
-	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
+	private static final Logger applicationLogger = LogManager.getLogger("IpAppender");
 	
 	/**
 	 * 
@@ -97,7 +97,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 	}
 
 	private static void logAction(String message) {
-    	System.out.println(message);
-    	applicationLogger.debug(message);
+    	System.out.println("JwtAuthorizationFilter : " + message);
+    	applicationLogger.debug("JwtAuthorizationFilter : " + message);
     }
 }
