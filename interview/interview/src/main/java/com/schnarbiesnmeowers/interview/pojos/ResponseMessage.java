@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 public class ResponseMessage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private String message;
+	private String message = "";
 
 	public String getMessage() {
 		return message;
@@ -21,4 +21,10 @@ public class ResponseMessage implements Serializable {
 		super();
 		this.message = message;
 	}
+
+	public ResponseMessage() {
+		super();
+	}
+	
+	
 }

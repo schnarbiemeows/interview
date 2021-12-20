@@ -3,6 +3,7 @@ package com.schnarbiesnmeowers.interview.controllers;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.INCORRECT_OLD_PASSWORD;
 import static com.schnarbiesnmeowers.interview.utilities.Constants.JWT_TOKEN_HEADER;
 
+import java.text.ParseException;
 import java.util.List;
 
 import javax.mail.MessagingException;
@@ -137,10 +138,11 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	 * @throws UserNotFoundException
 	 * @throws UsernameExistsException
 	 * @throws EmailExistsException
+	 * @throws ParseException 
 	 */
 	@PostMapping(path = "/login")
 	public ResponseEntity<InterviewUserDTO> login(@RequestBody InterviewUserDTO user)
-			throws UserNotFoundException, UsernameExistsException, EmailExistsException {
+			throws UserNotFoundException, UsernameExistsException, EmailExistsException, ParseException {
 		logAction("initiating the login process, authenticating the user");
 		authenticate(user.getUserName(), user.getPassword());
 		logAction("user has been authenticated");
@@ -235,8 +237,8 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	}
 
 	/**
-	 * update a InterviewUser
-	 * 
+	 * update an InterviewUser by the same user
+	 * update a user's contact info
 	 * @param InterviewUserDTO
 	 * @return InterviewUser
 	 */
@@ -287,7 +289,7 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	 * @return InterviewUser
 	 */
 	@PostMapping(path = "/create")
-	@PreAuthorize("hasAnyAuthority('admin:create')")
+	@PreAuthorize("hasAnyAuthority('admin:create','user:create')")
 	public ResponseEntity<InterviewUserDTO> createInterviewUser(@RequestHeader("Authorization") String token,
 			@Valid @RequestBody InterviewUserDTO data) throws Exception {
 		String alteredToken = removeBearerFromToken(token);
@@ -318,15 +320,6 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	}
 
 	/**
-	 * 
-	 * @param token
-	 * @return
-	 */
-	private String removeBearerFromToken(String token) {
-		return token.replace(Constants.TOKEN_PREFIX, "");
-	}
-
-	/**
 	 * delete a InterviewUser by their username
 	 * 
 	 * @param id
@@ -341,6 +334,15 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 		businessService.deleteInterviewUser(username, authorizations, adminUser);
 		ResponseMessage rb = new ResponseMessage("successfully deleted");
 		return ResponseEntity.status(HttpStatus.OK).body(rb);
+	}
+
+	/**
+	 * 
+	 * @param token
+	 * @return
+	 */
+	private String removeBearerFromToken(String token) {
+		return token.replace(Constants.TOKEN_PREFIX, "");
 	}
 
 	/**
@@ -360,8 +362,9 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	 * 
 	 * @param loggedInUserPrincipal
 	 * @return
+	 * @throws ParseException 
 	 */
-	private HttpHeaders getJwtHeader(UserPrincipal loggedInUserPrincipal) {
+	private HttpHeaders getJwtHeader(UserPrincipal loggedInUserPrincipal) throws ParseException {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Access-Control-Expose-Headers", JWT_TOKEN_HEADER);
 		headers.add(Constants.JWT_TOKEN_HEADER, this.jwtTokenProvider.generateJwtToken(loggedInUserPrincipal));
@@ -409,7 +412,7 @@ public class InterviewUserController extends InterviewUserExceptionHandling {
 	}
 
 	@GetMapping("/testemail")
-	public ResponseEntity<HttpResponse> testEmail() {
+	public ResponseEntity<HttpResponse> testEmail() throws AddressException, MessagingException, Exception {
 		logEmailAction("running an email test");
 		userService.testEmail();
 		logEmailAction("email test complete");

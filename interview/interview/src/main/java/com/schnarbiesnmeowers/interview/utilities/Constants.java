@@ -1,7 +1,5 @@
 package com.schnarbiesnmeowers.interview.utilities;
 
-import org.springframework.beans.factory.annotation.Value;
-
 /**
  * our main constants utility class
  * @author dylan
@@ -11,6 +9,7 @@ public class Constants {
 	
 	public static final long EXPIRATION_TIME = 432_000_000; // 5 days expressed in milliseconds
     public static final String TOKEN_PREFIX = "Bearer ";
+    public static final String AUTHORIZATION = "Authorization";
     public static final String JWT_TOKEN_HEADER = "Jwt-Token";
     public static final String TOKEN_CANNOT_BE_VERIFIED = "Token cannot be verified";
     public static final String COMPANY = "schnarbies-n-meowers";
@@ -25,6 +24,7 @@ public class Constants {
     		"/questioncategory/all",
     		"/questionlevel/all",
     		"/question/all",
+    		"/question/totals",
     		"/healthcheck/ping", 
     		"/interviewuser/login", 
     		"/interviewuser/register", 
@@ -67,4 +67,5 @@ public class Constants {
     public static final String FORWARD_SLASH = "/";
     public static final String NOT_AN_IMAGE_FILE = " is not an image file. Please upload an image file";
     public static final String TEMP_PROFILE_IMAGE_BASE_URL = "https://robohash.org/";
+    public static final String DELETED_MSG = "successfully deleted";
 }

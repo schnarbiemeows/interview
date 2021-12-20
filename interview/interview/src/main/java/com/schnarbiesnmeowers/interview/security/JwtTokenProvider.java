@@ -3,6 +3,9 @@ package com.schnarbiesnmeowers.interview.security;
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 import static java.util.Arrays.stream;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,15 +45,20 @@ public class JwtTokenProvider {
 	 * method to generate the JWT token
 	 * @param principal
 	 * @return
+	 * @throws ParseException 
 	 */
-	public String generateJwtToken(UserPrincipal principal) {
+	public String generateJwtToken(UserPrincipal principal) throws ParseException {
 		String[] claims = getClaimsFromPrincipal(principal); 
+//		DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+//		String dateStr = "12/31/2199";
+//		Date expirationDate = formatter.parse(dateStr);
 		Date newDate = new Date();
 		return JWT.create().withIssuer(Constants.COMPANY)
 				.withAudience(Constants.COMPANY_ADMINISTRATION)
 				.withIssuedAt(new Date())
 				.withSubject(principal.getUsername())
 				.withArrayClaim(Constants.AUTHORITIES, claims)
+				//.withExpiresAt(expirationDate)
 				.withExpiresAt(new Date(newDate.getTime()+Constants.EXPIRATION_TIME))
 				.sign(Algorithm.HMAC512(secret.getBytes()));
 	}

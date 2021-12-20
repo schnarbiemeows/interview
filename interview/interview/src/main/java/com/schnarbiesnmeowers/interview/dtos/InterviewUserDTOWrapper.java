@@ -36,7 +36,6 @@ public class InterviewUserDTOWrapper extends InterviewUserDTO {
 			String userName) {
 		super(userId, authorizations, emailAddr, firstName, userActive, userNotLocked, joinDate, lastLoginDate,
 				lastLoginDateDisplay, lastName, password, profileImage, roles, userIdentifier, userName);
-		// TODO Auto-generated constructor stub
 	}
 	public String getNewEmailAddr() {
 		return newEmailAddr;

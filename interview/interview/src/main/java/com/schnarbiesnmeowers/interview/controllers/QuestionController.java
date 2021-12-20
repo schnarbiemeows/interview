@@ -172,6 +172,17 @@ public class QuestionController {
 		List<QuestionDTO> results = businessService.findQuestionByQuestionCategoryIdAndQuestionLevelIdAndAnswerId(id0, id1, id2);
 		return ResponseEntity.status(HttpStatus.OK).body(results);
 	}
+	
+	/**
+	 * get all Question records
+	 * @return Iterable<Question>
+	 */
+	@GetMapping(path = "/totals")
+	public ResponseEntity<List<QuestionTotalsDTO>> getAllQuestionTotals() throws Exception {
+		List<QuestionTotalsDTO> question = businessService.getAllQuestionTotals();
+		return ResponseEntity.status(HttpStatus.OK).body(question);
+	}
+	
 
 	private static void logAction(String message) {
     	System.out.println(message);

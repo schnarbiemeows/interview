@@ -116,6 +116,28 @@ public class InterviewUserBusiness {
 	}
 
 	/**
+	 * delete a InterviewUser by primary key
+	 * we are either deleting an admin, or deleting a user
+	 * @param id
+	 * @return
+	 * @throws Exception
+	 */
+	public String deleteInterviewUser(String username, String[] authorizations, String adminUser) throws ResourceNotFoundException, AccessDeniedException {
+		try {
+			InterviewUser user = userService.findUserByUsername(username);
+			if(!userEqualsUser(adminUser, username) && adminRoleHigherThanUserRole(user.getRoles(),authorizations)) {
+				service.deleteById(user.getUserId());
+			} else {
+				throw new AccessDeniedException("You do not have enough permissions to perform this action.");
+			}
+		}
+		catch(ResourceNotFoundException e) {
+			throw new ResourceNotFoundException(ID_EQUALS + username + NOT_FOUND);
+		}
+		return "Successfully Deleted";
+	}
+
+	/**
 	 * this method will copy all of the new properties to the InterviewUser record
 	 * for this method, the only one of the "new" fields that I am going to use is the
 	 * newUserName, because I need to retain the old one to make sure I know which record to look for
@@ -224,28 +246,7 @@ public class InterviewUserBusiness {
 	}
 
 	/**
-	 * delete a InterviewUser by primary key
-	 * we are either deleting an admin, or deleting a user
-	 * @param id
-	 * @return
-	 * @throws Exception
-	 */
-	public String deleteInterviewUser(String username, String[] authorizations, String adminUser) throws ResourceNotFoundException {
-		try {
-			InterviewUser user = userService.findUserByUsername(username);
-			if(!userEqualsUser(adminUser, username) && adminRoleHigherThanUserRole(user.getRoles(),authorizations)) {
-				service.deleteById(user.getUserId());
-			}
-		}
-		catch(ResourceNotFoundException e) {
-			throw new ResourceNotFoundException(ID_EQUALS + username + NOT_FOUND);
-		}
-		return "Successfully Deleted";
-	}
-	
-
-	/**
-	 * this method checks to make sure the restration data that a new user has entered is valid
+	 * this method checks to make sure the registration data that a new user has entered is valid
 	 * @param user
 	 * @throws UserFieldsNotValidException
 	 */

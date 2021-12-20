@@ -16,11 +16,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.schnarbiesnmeowers.interview.dtos.QuestionAnswerItemDTO;
 import com.schnarbiesnmeowers.interview.dtos.QuestionDTO;
+import com.schnarbiesnmeowers.interview.dtos.QuestionTotalsDTO;
 import com.schnarbiesnmeowers.interview.exceptions.ResourceNotFoundException;
 import com.schnarbiesnmeowers.interview.pojos.Answer;
 import com.schnarbiesnmeowers.interview.pojos.Question;
+import com.schnarbiesnmeowers.interview.pojos.QuestionTotals;
 import com.schnarbiesnmeowers.interview.services.AnswerRepository;
 import com.schnarbiesnmeowers.interview.services.QuestionRepository;
+import com.schnarbiesnmeowers.interview.services.QuestionTotalsRepository;
 /**
  * this class retrieves data from the controller class
  * most business logic should be put in this class
@@ -39,6 +42,8 @@ public class QuestionBusiness {
 	@Autowired
 	private QuestionRepository service;
 	
+	@Autowired
+	private QuestionTotalsRepository totalsRepository;
 	/**
 	 * JPA Repository handle
 	 */
@@ -238,5 +243,21 @@ public class QuestionBusiness {
 	    question.setEvntTmestmp(new Date());
 	    question = service.save(question);
 		return data;
+	}
+	
+	/**
+	 * get all Question records
+	 * @return
+	 * @throws Exception
+	 */
+	public List<QuestionTotalsDTO> getAllQuestionTotals() throws Exception {
+		Iterable<QuestionTotals> question = totalsRepository.getQuestionTotals();
+		Iterator<QuestionTotals> questions = question.iterator();
+		List<QuestionTotalsDTO> questiondto = new ArrayList();
+		while(questions.hasNext()) {
+			QuestionTotals item = questions.next();
+			questiondto.add(item.toDTO());
+		}
+		return questiondto;
 	}
 }

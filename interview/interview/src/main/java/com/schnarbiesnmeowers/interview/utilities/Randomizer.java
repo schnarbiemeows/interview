@@ -6,8 +6,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Random;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 /**
  *
  * @author Dylan I. Kessler
@@ -16,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 public class Randomizer {
 
 	public static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	private static final Logger applicationLogger = LogManager.getLogger("FileAppender");
 	private static Random rand = new Random();
 
 	/**
@@ -142,9 +139,4 @@ public class Randomizer {
 	public static byte[] randomBytes(int length) {
 		return randomString(length).getBytes();
 	}
-	
-	private static void logAction(String message) {
-    	System.out.println(message);
-    	applicationLogger.debug(message);
-    }
 }

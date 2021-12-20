@@ -30,7 +30,7 @@ public class RecaptchaBusiness {
 	@Autowired
     private RestOperations restTemplate;
 	
-	public GoogleResponseDTO validateRecaptcha(String response) throws Exception {
+	public GoogleResponseDTO validateRecaptcha(String response) throws InvalidReCaptchaException, ReCaptchaInvalidException {
 		logAction("validating recaptcha");
 		GoogleResponseDTO googleResponse = null;
 		if(!responseSanityCheck(response)) {

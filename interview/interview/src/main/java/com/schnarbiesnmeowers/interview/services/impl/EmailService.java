@@ -94,20 +94,20 @@ public class EmailService {
 	public void sendConfirmEmailEmail(String emailAddress,String uniqueId) throws AddressException, MessagingException {
 		logEmailAction("sendConfirmEmailEmail - entering, emailAddress = " + emailAddress);
 		//successEmailUrl = "http://127.0.0.1:4200";
-		String pageLink = successEmailUrl + "/confirmemail";
+		String pageLink = successEmailUrl + "/register/confirmemail";
 		EmailTemplate template = new VerifyRegistrationEmailTemplate(emailAddress,username,pageLink,uniqueId,linkExpirationTime);
-		createAndSendEmail(template);
+		//createAndSendEmail(template);
 		logEmailAction("sendConfirmEmailEmail - leaving, emailAddress = " + emailAddress);
 	}
 
 	public void sendForgotPasswordEmail(String emailAddress,String uniqueId) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException {
 		logEmailAction("sendForgotPasswordEmail - entering, emailAddress = " + emailAddress);
-		//successEmailUrl = "http://127.0.0.1:4200";
-		String pageLink = successEmailUrl + "/passwordreset";
+		successEmailUrl = "http://127.0.0.1:4200";
+		String pageLink = successEmailUrl + "/login/passwordreset";
 		String loginUrl = successEmailUrl + "/login";
 		System.out.println(uniqueId);
 		EmailTemplate template = new ForgotPasswordEmailTemplate(emailAddress,pageLink,loginUrl,uniqueId,linkExpirationTime);
-		createAndSendEmail(template);
+		//createAndSendEmail(template);
 		logEmailAction("sendForgotPasswordEmail - leaving, emailAddress = " + emailAddress);
 	}
 
@@ -124,7 +124,7 @@ public class EmailService {
 		//successEmailUrl = "http://127.0.0.1:4200";
 		String loginUrl = successEmailUrl + "/login";
 		EmailTemplate template = new ForgotUsernameEmailTemplate(emailAddress, username, loginUrl);
-		createAndSendEmail(template);
+		//createAndSendEmail(template);
 		logEmailAction("sendEmailWithUsername - leaving, emailAddress = " + emailAddress);
 	}
 
@@ -145,7 +145,7 @@ public class EmailService {
 		} else {
 			template = new NoAddressFoundUREmailTemplate(emailAddress);
 		}
-		createAndSendEmail(template);
+		//createAndSendEmail(template);
 		logEmailAction("sendNoAddressFoundEmail - leaving, emailAddress = " + emailAddress);
 	}
 
@@ -162,19 +162,19 @@ public class EmailService {
 		logEmailAction("sendManagementEmail - entering");
 		EmailTemplate template = new ManagementEmailTemplate(subject, body);
 		template.setEmailAddress(cc);
-		createAndSendEmail(template);
+		//createAndSendEmail(template);
 		logEmailAction("sendManagementEmail - leaving");
 	}
 
 	private void createAndSendEmail(EmailTemplate template)
 			throws AddressException, MessagingException, NoSuchProviderException, SendFailedException {
-		logEmailAction("createAndSendEmail - sending email");
+		logEmailAction("//createAndSendEmail - sending email");
 		Message message = createEmail(template);
 		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
 		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
 		transport.sendMessage(message, message.getAllRecipients());
 		transport.close();
-		logEmailAction("createAndSendEmail - email sent");
+		logEmailAction("//createAndSendEmail - email sent");
 	}
 
 	/**
@@ -219,114 +219,28 @@ public class EmailService {
 		return Session.getInstance(properties,null);
 	}
 	
-	public void testEmail() {
+	public void testEmail() throws MessagingException,AddressException,Exception {
 		logEmailAction("entering testEmail()");
-		String emailAddress = "dylanikessler@yahoo.com";
 		try {
-			sendConfirmEmailEmail(emailAddress,"XXX");
-			sendForgotPasswordEmail(emailAddress,"XXX");
-			sendEmailWithUsername(emailAddress,"XXX");
-			sendNoAddressFoundEmail(emailAddress,true);
-			sendNoAddressFoundEmail(emailAddress,false);
+			sendConfirmEmailEmail(cc,"XXX");
+			sendForgotPasswordEmail(cc,"XXX");
+			sendEmailWithUsername(cc,"XXX");
+			sendNoAddressFoundEmail(cc,true);
+			sendNoAddressFoundEmail(cc,false);
 			sendManagementEmail("SUBJECT","BODY");
-//		Message message = createTestEmail();
-//		SMTPTransport transport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
-//		transport.connect(GMAIL_SMTP_SERVER, username, waffle);
-//		transport.sendMessage(message, message.getAllRecipients());
-//		transport.close();	
 		logEmailAction("Sent test email to --> " + cc);
 		} catch(AddressException ae) {
 			logEmailAction("AddressException sending test email --> " + ae.getMessage());
+			throw ae;
 		} catch(MessagingException me) {
 			logEmailAction("MessagingException sending test email  --> " + me.getMessage());
+			throw me;
 		} catch(Exception ee) {
 			logEmailAction("General Exception sending test email  --> " + ee.getMessage());
+			throw ee;
 		}
 		logEmailAction("leaving testEmail()");
 	}
-	
-//	public void testEmail() {
-//		try {
-//		      AmazonSimpleEmailService client = 
-//		          AmazonSimpleEmailServiceClientBuilder.standard()
-//		          // Replace US_WEST_2 with the AWS Region you're using for
-//		          // Amazon SES.
-//		            .withRegion(Regions.US_EAST_1).build();
-//		      SendEmailRequest request = new SendEmailRequest()
-//		          .withDestination(
-//		              new Destination().withToAddresses(TO))
-//		          .withMessage(new com.amazonaws.services.simpleemail.model.Message()
-//		              .withBody(new Body()
-//		                  .withHtml(new Content()
-//		                      .withCharset("UTF-8").withData(HTMLBODY))
-//		                  .withText(new Content()
-//		                      .withCharset("UTF-8").withData(TEXTBODY)))
-//		              .withSubject(new Content()
-//		                  .withCharset("UTF-8").withData(SUBJECT)))
-//		          .withSource(FROM);
-//		          // Comment or remove the next line if you are not using a
-//		          // configuration set
-//		          //.withConfigurationSetName(CONFIGSET);
-//		      client.sendEmail(request);
-//		      System.out.println("Email sent!");
-//		    } catch (Exception ex) {
-//		      System.out.println("The email was not sent. Error message: " 
-//		          + ex.getMessage());
-//		    }
-//	}
-	
-//	public void testEmail() {
-//		String templateName = "interviewmailer76verifyemailtemplate_1";
-//		String fromEmailAddress = "interviewmailer76@gmail.com";
-//		String templateSubject = "testing our verification email";
-//		String templateContent = "<h1>click below to verify email!</h1>";
-//		String successUrl = "https://d1fd2sjari3xmm.cloudfront.net/success";
-//		String failureUrl = "https://d1fd2sjari3xmm.cloudfront.net/failure";
-//		try {
-//			SendCustomVerificationEmailRequest request = new SendCustomVerificationEmailRequest()
-//					.withEmailAddress(TO)
-//					.withTemplateName(templateName);
-//			AmazonSimpleEmailService client = AmazonSimpleEmailServiceClientBuilder.standard()
-//			          // Replace US_WEST_2 with the AWS Region you're using for
-//			          // Amazon SES.
-//			            .withRegion(Regions.US_EAST_1).build();
-//			client.sendCustomVerificationEmail(request);
-//			System.out.println("Check");
-//		} catch (Exception ex) {
-//			ex.printStackTrace();
-//		      System.out.println("The email was not sent. Error message: " 
-//			          + ex.getMessage());
-//			    }
-//	}
-	
-//	public void testEmail() {
-//		String templateName = "interviewmailer76verifyemailtemplate_1";
-//		String fromEmailAddress = "interviewmailer76@gmail.com";
-//		String templateSubject = "testing our verification email";
-//		String templateContent = "<h1>click below to verify email!</h1>";
-//		String successUrl = "https://d1fd2sjari3xmm.cloudfront.net/success";
-//		String failureUrl = "https://d1fd2sjari3xmm.cloudfront.net/failure";
-//		try {
-//			CreateCustomVerificationEmailTemplateRequest createTemplate = new CreateCustomVerificationEmailTemplateRequest()
-//					.withFromEmailAddress(fromEmailAddress)
-//					.withTemplateName(templateName)
-//					.withTemplateSubject(templateSubject)
-//					.withTemplateContent(templateContent)
-//					.withFailureRedirectionURL(failureUrl)
-//					.withSuccessRedirectionURL(successUrl);
-//			AmazonSimpleEmailService client = 
-//			          AmazonSimpleEmailServiceClientBuilder.standard()
-//			          // Replace US_WEST_2 with the AWS Region you're using for
-//			          // Amazon SES.
-//			            .withRegion(Regions.US_EAST_1).build();
-//			CreateCustomVerificationEmailTemplateResult result = client.createCustomVerificationEmailTemplate(createTemplate);
-//			System.out.println("Check");
-//		} catch (Exception ex) {
-//			ex.printStackTrace();
-//		      System.out.println("The email was not sent. Error message: " 
-//			          + ex.getMessage());
-//			    }
-//	}
 	
 	/**
 	 * logging method

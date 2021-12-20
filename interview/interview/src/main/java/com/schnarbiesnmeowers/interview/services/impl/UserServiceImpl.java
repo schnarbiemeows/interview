@@ -300,8 +300,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	 */
 	 public void setPassword(String username, String password) {
 		logAction("New user identifier = " + username + " to --> " + password);
-	 	InterviewUser user = repository.findUserByUserName(username); String
-	 	encodedPassword = encodePassword(password);
+	 	InterviewUser user = repository.findUserByUserName(username); 
+	 	String encodedPassword = encodePassword(password);
 	 	user.setPassword(encodedPassword); 
 	 	repository.save(user); 
 	 }
@@ -712,9 +712,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	/**
 	 * test method for testing the email functionality
 	 * TODO - remove
+	 * @throws Exception 
+	 * @throws MessagingException 
+	 * @throws AddressException 
 	 */
 	@Override
-	public void testEmail() {
+	public void testEmail() throws AddressException, MessagingException, Exception {
 		this.emailService.testEmail();
 	}
 

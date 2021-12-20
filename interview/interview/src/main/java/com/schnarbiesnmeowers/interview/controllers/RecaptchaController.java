@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.schnarbiesnmeowers.interview.business.RecaptchaBusiness;
 import com.schnarbiesnmeowers.interview.dtos.GoogleRequestDTO;
 import com.schnarbiesnmeowers.interview.dtos.GoogleResponseDTO;
+import com.schnarbiesnmeowers.interview.exceptions.InvalidReCaptchaException;
+import com.schnarbiesnmeowers.interview.exceptions.ReCaptchaInvalidException;
 
 @RestController
 @RequestMapping(path="/recaptcha")
@@ -22,12 +24,14 @@ public class RecaptchaController {
 	private RecaptchaBusiness recaptchaBusiness;
 	
 	@PostMapping(path = "/post")
-	public ResponseEntity<GoogleResponseDTO> validateRecaptcha(@Valid @RequestBody GoogleRequestDTO data) throws Exception {
+	public ResponseEntity<GoogleResponseDTO> validateRecaptcha(@Valid @RequestBody GoogleRequestDTO data) throws InvalidReCaptchaException, ReCaptchaInvalidException {
 		try {
 			GoogleResponseDTO response = recaptchaBusiness.validateRecaptcha(data.getResponse());
 		    return ResponseEntity.status(HttpStatus.CREATED).body(response);
-		} catch (Exception e) {
-			throw e;
+		} catch(InvalidReCaptchaException e1) {
+			throw e1;
+		} catch(ReCaptchaInvalidException e2) {
+			throw e2;
 		}
 	}
 

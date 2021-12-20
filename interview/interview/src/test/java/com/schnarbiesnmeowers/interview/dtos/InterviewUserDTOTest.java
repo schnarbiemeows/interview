@@ -1,5 +1,7 @@
 package com.schnarbiesnmeowers.interview.dtos;
 
+import com.google.gson.Gson;
+import com.schnarbiesnmeowers.interview.pojos.InterviewUser;
 import com.schnarbiesnmeowers.interview.utilities.Randomizer;
 import static org.junit.Assert.*;
 import java.util.*;
@@ -61,6 +63,12 @@ public class InterviewUserDTOTest {
 		String string = classUnderTest.toString();
 		assertNotNull(string);
 		assertTrue(string.length()>0);
+		InterviewUser interviewUser = classUnderTest.toEntity();
+		assertTrue(interviewUser.getUserName().equals(classUnderTest.getUserName()));
+		Gson gson = new Gson();
+		String userStr = gson.toJson(classUnderTest);
+		InterviewUserDTO newDTO = InterviewUserDTO.fromJson(userStr);
+		assertTrue(newDTO.getUserName().equals(classUnderTest.getUserName()));
 	}
 
 }

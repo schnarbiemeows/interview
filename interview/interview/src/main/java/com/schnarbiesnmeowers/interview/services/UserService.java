@@ -53,7 +53,7 @@ public interface UserService {
 	void forgotUsername(String email) throws AddressException, MessagingException, EmailNotFoundException;
 	InterviewUser updateProfileImage(String username, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, NotAnImageFileException;
 	public String getTemporaryImageUrl(String username);
-	public void testEmail();
+	public void testEmail() throws AddressException, MessagingException, Exception;
 	InterviewUser confirmEmail(String id) throws ExpiredLinkException, UserNotFoundException;
 	CheckPasswordResetResponseDTO checkPasswordResetTable(String id) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException;
 	InterviewUserDTO changePassword(PasswordResetDTO input) throws AddressException, NoSuchProviderException, SendFailedException, MessagingException, PasswordResetException;

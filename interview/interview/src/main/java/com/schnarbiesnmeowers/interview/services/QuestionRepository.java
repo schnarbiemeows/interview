@@ -1,6 +1,7 @@
 package com.schnarbiesnmeowers.interview.services;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.schnarbiesnmeowers.interview.pojos.Question;
 /**
@@ -34,4 +35,5 @@ public interface QuestionRepository extends JpaRepository<Question, Integer>{
 	 * @return Iterable<Question>
 	*/
 	public Iterable<Question> findQuestionByQuestionCategoryIdAndQuestionLevelIdAndAnswerId(int questionCategoryId,int questionLevelId,int answerId);
+	
 }

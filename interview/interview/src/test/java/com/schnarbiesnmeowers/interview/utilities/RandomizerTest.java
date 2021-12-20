@@ -1,12 +1,8 @@
 package com.schnarbiesnmeowers.interview.utilities;
 
-import com.schnarbiesnmeowers.interview.utilities.Randomizer;
-import static org.junit.Assert.*;
-import java.util.*;
-import java.sql.Time;
-import java.sql.Timestamp;
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.Test;
-import java.math.*;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -21,8 +17,7 @@ public class RandomizerTest {
 
 	@Test
 	public void testMethods() {
-	    Randomizer rand = new Randomizer();
-		assertNotNull(Randomizer.randomString(10));
+	    assertNotNull(Randomizer.randomString(10));
 		assertNotNull(Randomizer.randomInt(10)) ;
 		assertNotNull(Randomizer.randomLong(10)) ;
 		assertNotNull(Randomizer.randomFloat(10F)) ;
@@ -30,6 +25,7 @@ public class RandomizerTest {
 		assertNotNull(Randomizer.randomBigDecimal("10"));
 		assertNotNull(Randomizer.randomBigInteger("10"));
 		assertNotNull(Randomizer.randomDate()) ;
+		assertNotNull(Randomizer.randomBoolean()) ;
 		assertNotNull(Randomizer.randomTimestamp(1000)) ;
 		assertNotNull(Randomizer.randomTime(1000)) ;
 		assertNotNull(Randomizer.randomBytes(10)) ;

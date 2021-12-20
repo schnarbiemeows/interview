@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class AnswerTest {
 
+	public static final String A = "a";
 	/**
 	 * test both constructors, getters and setters, and toString() method
 	 */
@@ -24,9 +25,9 @@ public class AnswerTest {
 	public void testClass() {
 		Answer classUnderTest = new Answer();
 		classUnderTest.setAnswerId(new Integer(1));
-		classUnderTest.setAnswerTxt("a");
+		classUnderTest.setAnswerTxt(A);
 		classUnderTest.setEvntTmestmp(new Date());
-		classUnderTest.setEvntOperId("a");
+		classUnderTest.setEvntOperId(A);
 		assertTrue(true);
 		Answer newitem = new Answer(
 		classUnderTest.getAnswerId(),
