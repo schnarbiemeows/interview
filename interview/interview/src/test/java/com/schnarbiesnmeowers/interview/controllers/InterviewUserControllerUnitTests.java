@@ -76,9 +76,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 //@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+//@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@TestPropertySource(properties = "spring.datasource.hikari.maximum-pool-size=1")
 public class InterviewUserControllerUnitTests {
 

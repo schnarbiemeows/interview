@@ -73,8 +73,8 @@ import com.schnarbiesnmeowers.interview.utilities.Roles;
  * @author dylan
  *
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+//@RunWith(SpringRunner.class)
+//@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 public class ServiceAndControllerTests {
 

@@ -55,7 +55,7 @@ import com.schnarbiesnmeowers.interview.utilities.Randomizer;
  * @author Dylan I. Kessler
  *
  */
-//@RunWith(SpringRunner.class)
+////@RunWith(SpringRunner.class)
 //@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 //@Spring_X_BootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@TestPropertySource(properties = "spring.datasource.hikari.maximum-pool-size=1")

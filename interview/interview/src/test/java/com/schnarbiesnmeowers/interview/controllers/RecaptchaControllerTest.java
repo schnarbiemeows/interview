@@ -42,7 +42,7 @@ import com.google.gson.Gson;
  * @author dylan
  *
  */
-//@RunWith(SpringRunner.class)
+////@RunWith(SpringRunner.class)
 //@Spring_X_BootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class RecaptchaControllerTest {
 

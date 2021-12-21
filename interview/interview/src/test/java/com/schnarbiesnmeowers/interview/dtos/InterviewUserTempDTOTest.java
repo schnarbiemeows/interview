@@ -14,7 +14,7 @@ import com.schnarbiesnmeowers.interview.pojos.InterviewUser;
 import com.schnarbiesnmeowers.interview.pojos.InterviewUserTemp;
 import com.schnarbiesnmeowers.interview.utilities.Randomizer;
 
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 public class InterviewUserTempDTOTest {
 
 	/**

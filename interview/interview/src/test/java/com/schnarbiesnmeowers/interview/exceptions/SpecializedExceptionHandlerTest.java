@@ -14,7 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 public class SpecializedExceptionHandlerTest {
 
 	public static final String A = "a";

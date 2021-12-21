@@ -63,9 +63,9 @@ import com.schnarbiesnmeowers.interview.utilities.Roles;
  * @author Dylan I. Kessler
  *
  */
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+//@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@TestPropertySource(properties = "spring.datasource.hikari.maximum-pool-size=1")
 public class InterviewUserControllerIntegrationTests {
 

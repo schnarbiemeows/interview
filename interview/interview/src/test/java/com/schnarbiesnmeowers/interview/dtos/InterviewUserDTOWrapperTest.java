@@ -11,7 +11,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.google.gson.Gson;
 import com.schnarbiesnmeowers.interview.pojos.InterviewUser;
 
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 public class InterviewUserDTOWrapperTest {
 
 	public static final String A = "a";

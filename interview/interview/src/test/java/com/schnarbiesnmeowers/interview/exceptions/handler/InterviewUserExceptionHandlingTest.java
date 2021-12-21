@@ -17,8 +17,8 @@ import com.schnarbiesnmeowers.interview.security.JwtTokenProvider;
 import com.schnarbiesnmeowers.interview.services.UserService;
 import com.schnarbiesnmeowers.interview.services.impl.UserServiceImpl;
 
-//@RunWith(SpringRunner.class)
-//@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+////@RunWith(SpringRunner.class)
+////@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@AutoConfigureMockMvc
 public class InterviewUserExceptionHandlingTest {
 

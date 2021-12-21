@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 
 //@WebMvcTest(HealthCheckController.class)
-//@RunWith(SpringRunner.class)
+////@RunWith(SpringRunner.class)
 //@Spring_X_BootTest
 //@WebMvcTest
 //@AutoConfigureMockMvc

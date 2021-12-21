@@ -15,7 +15,7 @@ import com.schnarbiesnmeowers.interview.utilities.Roles;
  * @author dylan
  *
  */
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 public class UserPrincipalTest {
 
 	public static final String A = "a";

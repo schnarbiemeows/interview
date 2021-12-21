@@ -15,7 +15,7 @@ import com.schnarbiesnmeowers.interview.exceptions.interviewuser.UserFieldsNotVa
  * @author dylan
  *
  */
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 public class InterviewUserBusinessTest {
 
 	public static final String A = "a";

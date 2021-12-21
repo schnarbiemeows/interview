@@ -52,8 +52,8 @@ import com.schnarbiesnmeowers.interview.services.InterviewUserRepository;
 import com.schnarbiesnmeowers.interview.services.InterviewUserTempRepository;
 import com.schnarbiesnmeowers.interview.services.PasswordResetRepository;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+//@RunWith(SpringRunner.class)
+//@SpringBootTest
 @TestPropertySource(properties = "spring.datasource.hikari.maximum-pool-size=1")
 public class UserServiceImplTest {
 

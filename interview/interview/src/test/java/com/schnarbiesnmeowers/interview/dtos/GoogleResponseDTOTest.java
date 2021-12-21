@@ -8,7 +8,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.schnarbiesnmeowers.interview.dtos.GoogleResponseDTO.ErrorCode;
 
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 public class GoogleResponseDTOTest {
 
 	public static final String A = "a";

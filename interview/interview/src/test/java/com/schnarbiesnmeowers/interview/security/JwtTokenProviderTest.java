@@ -19,7 +19,7 @@ import com.schnarbiesnmeowers.interview.utilities.Roles;
  * @author dylan
  *
  */
-//@RunWith(SpringRunner.class)
+////@RunWith(SpringRunner.class)
 public class JwtTokenProviderTest {
 
 	

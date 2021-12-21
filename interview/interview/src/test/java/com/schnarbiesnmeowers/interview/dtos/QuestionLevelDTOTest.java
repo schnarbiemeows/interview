@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author Dylan I. Kessler
  *
  */
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 public class QuestionLevelDTOTest {
 
 	/**
