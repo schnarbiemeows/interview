@@ -18,6 +18,12 @@ public class HealthCheckController {
 		return "success!";
 	}
 	
+	@GetMapping(path="/pong")
+	public String healthcheck2() {
+		logAction("success");
+		return "pong!";
+	}
+	
 	private static void logAction(String message) {
     	System.out.println(message);
     	applicationLogger.debug(message);
