@@ -15,7 +15,7 @@ public class HealthCheckController {
 	@GetMapping(path="/ping")
 	public String healthcheck() {
 		logAction("success");
-		return "success!";
+		return "pong!";
 	}
 	
 	@GetMapping(path="/pong")
