@@ -15,13 +15,13 @@ public class HealthCheckController {
 	@GetMapping(path="/ping")
 	public String healthcheck() {
 		logAction("success");
-		return "pong!";
+		return "pang!";
 	}
 	
 	@GetMapping(path="/pong")
 	public String healthcheck2() {
 		logAction("success");
-		return "pang!";
+		return "pong!";
 	}
 	
 	private static void logAction(String message) {
