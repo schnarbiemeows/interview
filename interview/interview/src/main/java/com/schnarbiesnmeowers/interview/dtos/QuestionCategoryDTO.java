@@ -14,8 +14,9 @@ import org.apache.logging.log4j.Logger;
  * @author Dylan I. Kessler
  *
  */
-public class QuestionCategoryDTO implements Serializable {
+public class QuestionCategoryDTO implements Serializable, Comparable<QuestionCategoryDTO> {
 	
+	private static final String[] sortingItems = {"Java - ","Python","Scala","SQL","Linux","front end","Spark -"}; // 7 items
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -110,5 +111,39 @@ public class QuestionCategoryDTO implements Serializable {
 	}
 	public QuestionCategory toEntity() {
 		return new QuestionCategory(this.getQuestionCategoryId(),this.getQuestionCategoryDesc(),this.getEvntTmestmp(),this.getEvntOperId(),this.getDisplayCde());
+	}
+
+	@Override
+	public int compareTo(QuestionCategoryDTO o) {
+		/**
+		 * the order that I want the categories in:
+		 * 1. Java first
+		 * 2. Python then Scala
+		 * 3. SQL stuff
+		 * 4. linux
+		 * 5. front end
+		 * 6. Spark
+		 * 7. other stuff
+		 * 
+		 */
+		// compareTo should return < 0 if this is supposed to be
+        // less than other, > 0 if this is supposed to be greater than 
+        // other and 0 if they are supposed to be equal
+		return innerCompareTo(o,0);
+	}
+	
+	private int innerCompareTo(QuestionCategoryDTO that, int index) {
+		if(index<sortingItems.length) {
+			String wordToSearchFor = sortingItems[index];
+			if(this.questionCategoryDesc.toUpperCase().contains(wordToSearchFor.toUpperCase()) &&
+					!that.questionCategoryDesc.toUpperCase().contains(wordToSearchFor.toUpperCase())) {
+				return -1;
+			} else if(!this.questionCategoryDesc.toUpperCase().contains(wordToSearchFor.toUpperCase()) &&
+					that.questionCategoryDesc.toUpperCase().contains(wordToSearchFor.toUpperCase())) {
+				return 1;
+			} else return innerCompareTo(that,index+1);
+		} else {
+			return this.questionCategoryDesc.compareTo(that.getQuestionCategoryDesc());
+		}
 	}
 }

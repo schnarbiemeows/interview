@@ -1,6 +1,7 @@
 package com.schnarbiesnmeowers.interview.business;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +47,7 @@ public class QuestionCategoryBusiness {
 			QuestionCategory item = questioncategorys.next();
 			questioncategorydto.add(item.toDTO());
 		}
+		Collections.sort(questioncategorydto);
 		return questioncategorydto;
 	}
 
